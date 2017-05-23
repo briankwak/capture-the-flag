@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CapturetheFlag.iml" filepath="$PROJECT_DIR$/CapturetheFlag.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/capture-the-flag.iml" filepath="$PROJECT_DIR$/capture-the-flag.iml" />
     </modules>
   </component>
 </project>
