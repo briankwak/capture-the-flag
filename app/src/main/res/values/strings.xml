@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">Capture the Flag</string>
-    <string name="button_string">Open Map</string>
+    <string name="new_game_button">New Game</string>
+    <string name="join_game_button">Join Game</string>
+
     <string name="map_name">Map</string>
+    <string name="new_game_name">New Game</string>
+    <string name="join_game_name">Join Game</string>
+
+    <string name="game_name">Game Name:</string>
+    <string name="tap_instruction">Tap to determine game boundaries.</string>
+    <string name="type_here">Type here</string>
+    <string name="confirm">Confirm</string>
+    <string name="player_name">Player Name</string>
 </resources>

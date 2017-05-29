@@ -16,6 +16,18 @@
 
 package csm117.ucla.capturetheflag;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.graphics.Color;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -34,49 +46,54 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.Toast;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import csm117.ucla.capturetheflag.R;
-
-public class MapActivity extends AppCompatActivity
+public class NewGameActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult> {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnMapClickListener {
 
-    protected static final String TAG = "MapActivity";
+    protected static final String TAG = "NewGameActivity";
     protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0x49;
     private static final float MAP_ZOOM = 15;
+
+    private static final double AREA_WIDTH = 0.0025;
+    private static final double AREA_HEIGHT = 0.0025;
 
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
     protected LocationSettingsRequest mLocationSettingsRequest;
     protected Location mCurrentLocation;
+    protected LatLng mCurrentLatLng;
     private String mLastUpdateTime;
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-    private Marker mMarker;
     private GoogleMap mMap;
-    private LatLngInterpolator.Linear mInterpolator;
+    private Polygon mRedTeamArea;
+    private Polygon mBlueTeamArea;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
+        setContentView(R.layout.activity_new_game);
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -86,7 +103,7 @@ public class MapActivity extends AppCompatActivity
         createLocationRequest();
         buildLocationSettingsRequest();
 
-        mInterpolator = new LatLngInterpolator.Linear();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -115,8 +132,8 @@ public class MapActivity extends AppCompatActivity
     }
 
     /**
-     * Uses a {@link com.google.android.gms.location.LocationSettingsRequest.Builder} to build
-     * a {@link com.google.android.gms.location.LocationSettingsRequest} that is used for checking
+     * Uses a {@link LocationSettingsRequest.Builder} to build
+     * a {@link LocationSettingsRequest} that is used for checking
      * if a device has the needed location settings.
      */
     protected void buildLocationSettingsRequest() {
@@ -138,7 +155,7 @@ public class MapActivity extends AppCompatActivity
      * The callback invoked when
      * {@link com.google.android.gms.location.SettingsApi#checkLocationSettings(GoogleApiClient,
      * LocationSettingsRequest)} is called. Examines the
-     * {@link com.google.android.gms.location.LocationSettingsResult} object and determines if
+     * {@link LocationSettingsResult} object and determines if
      * location settings are adequate. If they are not, begins the process of presenting a location
      * settings dialog to the user.
      */
@@ -148,7 +165,7 @@ public class MapActivity extends AppCompatActivity
         switch (status.getStatusCode()) {
             case LocationSettingsStatusCodes.SUCCESS:
                 Log.i(TAG, "All location settings are satisfied.");
-                startLocationUpdates();
+                //startLocationUpdates();
                 break;
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                 Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to" +
@@ -157,7 +174,7 @@ public class MapActivity extends AppCompatActivity
                 try {
                     // Show the dialog by calling startResolutionForResult(), and check the result
                     // in onActivityResult().
-                    status.startResolutionForResult(MapActivity.this, REQUEST_CHECK_SETTINGS);
+                    status.startResolutionForResult(NewGameActivity.this, REQUEST_CHECK_SETTINGS);
                 } catch (IntentSender.SendIntentException e) {
                     Log.i(TAG, "PendingIntent unable to execute request.");
                 }
@@ -195,9 +212,8 @@ public class MapActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
-        if(mMarker == null && mCurrentLocation != null) {
-            mMarker = map.addMarker(new MarkerOptions().position(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude())).title("Marker"));
-        }
+
+        mMap.setOnMapClickListener(this);
     }
 
     @Override
@@ -206,9 +222,11 @@ public class MapActivity extends AppCompatActivity
         if (mCurrentLocation == null) {
 
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
+            buildRectangle(mCurrentLatLng);
 
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()),
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng,
                     MAP_ZOOM));
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         }
@@ -227,16 +245,8 @@ public class MapActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
+        mCurrentLatLng = new LatLng(location.getLatitude(),location.getLongitude());
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        Toast.makeText(this, "Location updated",
-                Toast.LENGTH_SHORT).show();
-
-        if(mMarker == null) {
-            mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLongitude())).title("Marker"));
-        } else{
-            //mMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
-            MarkerAnimation.animateMarkerToICS(mMarker,new LatLng(location.getLatitude(),location.getLongitude()),mInterpolator);
-        }
     }
 
     @Override
@@ -268,7 +278,7 @@ public class MapActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
         if (mGoogleApiClient.isConnected()) {
-            startLocationUpdates();
+            //startLocationUpdates();
         }
     }
 
@@ -285,4 +295,83 @@ public class MapActivity extends AppCompatActivity
         super.onStop();
         mGoogleApiClient.disconnect();
     }
+
+    /* buncha rectangle nonsense */
+    private void buildRectangle(LatLng latLng){
+        mRedTeamArea = mMap.addPolygon(new PolygonOptions()
+                .addAll(createRectangle(latLng, AREA_WIDTH, AREA_HEIGHT, true))
+                .fillColor(Color.argb(32, 255, 0, 0))
+                .strokeColor(Color.argb(128, 255, 0, 0))
+                .strokeWidth(10));
+
+        mBlueTeamArea = mMap.addPolygon(new PolygonOptions()
+                .addAll(createRectangle(latLng, AREA_WIDTH, AREA_HEIGHT, false))
+                .fillColor(Color.argb(32, 0, 0, 255))
+                .strokeColor(Color.argb(128, 0, 0, 255))
+                .strokeWidth(10));
+    }
+
+    private List<LatLng> createRectangle(LatLng center, double halfWidth, double halfHeight, boolean bottom) {
+        if(bottom) {
+            return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
+                    new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
+                    new LatLng(center.latitude, center.longitude + halfWidth),
+                    new LatLng(center.latitude, center.longitude - halfWidth),
+                    new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
+        } else{
+            return Arrays.asList(new LatLng(center.latitude, center.longitude - halfWidth),
+                    new LatLng(center.latitude, center.longitude + halfWidth),
+                    new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
+                    new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
+                    new LatLng(center.latitude, center.longitude - halfWidth));
+        }
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        mRedTeamArea.setPoints(createRectangle(latLng,AREA_WIDTH,AREA_HEIGHT, true));
+        mBlueTeamArea.setPoints(createRectangle(latLng,AREA_WIDTH,AREA_HEIGHT, false));
+    }
+
+    public void pressConfirm(View view){
+        EditText gameEditText = (EditText)findViewById(R.id.game_name);
+        final String gameName = gameEditText.getText().toString();
+        EditText playerEditText = (EditText)findViewById(R.id.player_name);
+        final String playerName = playerEditText.getText().toString();
+        if(gameName.length() == 0) {
+            Toast.makeText(getApplicationContext(), "Please choose a game name.", Toast.LENGTH_SHORT).show();
+        } else if(playerName.length() == 0){
+            Toast.makeText(getApplicationContext(), "Please choose a player name.", Toast.LENGTH_SHORT).show();
+        } else {
+            final Area area = new Area(mRedTeamArea.getPoints(),mBlueTeamArea.getPoints());
+            final Player player = new Player(playerName,mCurrentLatLng);
+
+            mDatabase.child("games").child(gameName).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.exists()){
+                        Toast.makeText(getApplicationContext(), "Game name already in use!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    childUpdates.put("/games/" + gameName, true);
+                    childUpdates.put("/areas/" + gameName, area.toMap());
+                    childUpdates.put("/players/" + gameName + "/" + playerName, player.toMap());
+
+                    mDatabase.updateChildren(childUpdates);
+                    changeActivity();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError firebaseError) {}
+            });
+
+        }
+    }
+    public void changeActivity(){
+        Intent intent = new Intent(this, MapActivity.class);
+        startActivity(intent);
+    }
 }
+
