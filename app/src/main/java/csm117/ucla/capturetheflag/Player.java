@@ -11,19 +11,23 @@ import java.util.Map;
  */
 
 public class Player{
-    public String name;
     public LatLng latLng;
+    public String team;
+    public long time;
 
     public Player(){}
-    public Player(String name, LatLng latLng){
-        this.name = name;
+    public Player(LatLng latLng,long time){
         this.latLng = latLng;
+        this.team = "none";
+        this.time = time;
     }
 
     @Exclude
     public Map<String,Object> toMap(){
         HashMap<String,Object> location = new HashMap<>();
         location.put("location",latLng);
+        location.put("team",team);
+        location.put("time",time);
         return location;
     }
 }

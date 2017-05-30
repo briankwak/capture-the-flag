@@ -344,7 +344,7 @@ public class NewGameActivity extends AppCompatActivity
             Toast.makeText(getApplicationContext(), "Please choose a player name.", Toast.LENGTH_SHORT).show();
         } else {
             final Area area = new Area(mRedTeamArea.getPoints(),mBlueTeamArea.getPoints());
-            final Player player = new Player(playerName,mCurrentLatLng);
+            final Player player = new Player(mCurrentLatLng,System.currentTimeMillis());
 
             mDatabase.child("games").child(gameName).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -360,7 +360,7 @@ public class NewGameActivity extends AppCompatActivity
                     childUpdates.put("/players/" + gameName + "/" + playerName, player.toMap());
 
                     mDatabase.updateChildren(childUpdates);
-                    changeActivity();
+                    changeActivity(gameName,playerName);
                 }
 
                 @Override
@@ -369,8 +369,10 @@ public class NewGameActivity extends AppCompatActivity
 
         }
     }
-    public void changeActivity(){
-        Intent intent = new Intent(this, MapActivity.class);
+    public void changeActivity(String gameName,String playerName){
+        Intent intent = new Intent(this, WaitingRoomActivity.class);
+        intent.putExtra("game",gameName);
+        intent.putExtra("player",playerName);
         startActivity(intent);
     }
 }

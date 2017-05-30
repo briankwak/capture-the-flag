@@ -71,12 +71,12 @@ public class JoinGameActivity extends AppCompatActivity {
                    Toast.makeText(getApplicationContext(), "Player name already in use!", Toast.LENGTH_SHORT).show();
                    return;
                 }
-                Player player = new Player(playerName,new LatLng(0.0,0.0));
+                Player player = new Player(new LatLng(0.0,0.0),System.currentTimeMillis());
                 Map<String, Object> childUpdates = new HashMap<>();
                 childUpdates.put("/players/" + gameName + "/" + playerName, player.toMap());
 
                 mDatabase.updateChildren(childUpdates);
-                changeActivity();
+                changeActivity(gameName,playerName);
             }
 
             @Override
@@ -84,8 +84,10 @@ public class JoinGameActivity extends AppCompatActivity {
         });
     }
 
-    public void changeActivity(){
-        Intent intent = new Intent(this, MapActivity.class);
+    public void changeActivity(String gameName,String playerName){
+        Intent intent = new Intent(this, WaitingRoomActivity.class);
+        intent.putExtra("game",gameName);
+        intent.putExtra("player",playerName);
         startActivity(intent);
     }
 }
