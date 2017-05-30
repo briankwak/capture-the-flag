@@ -44,6 +44,9 @@ public class JoinGameActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot.exists()){
+                        if((boolean)dataSnapshot.getValue()){
+                            Toast.makeText(getApplicationContext(), "Game already in progress", Toast.LENGTH_SHORT).show();
+                        }
                         handleKey(gameName);
                         return;
                     }
@@ -72,10 +75,8 @@ public class JoinGameActivity extends AppCompatActivity {
                    return;
                 }
                 Player player = new Player(new LatLng(0.0,0.0),System.currentTimeMillis());
-                Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put("/players/" + gameName + "/" + playerName, player.toMap());
 
-                mDatabase.updateChildren(childUpdates);
+                mDatabase.child("players").child(gameName).child(playerName).setValue(player.toMap());
                 changeActivity(gameName,playerName);
             }
 
@@ -88,6 +89,7 @@ public class JoinGameActivity extends AppCompatActivity {
         Intent intent = new Intent(this, WaitingRoomActivity.class);
         intent.putExtra("game",gameName);
         intent.putExtra("player",playerName);
+        intent.putExtra("creator",false);
         startActivity(intent);
     }
 }

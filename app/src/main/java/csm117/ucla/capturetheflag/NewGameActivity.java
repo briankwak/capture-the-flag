@@ -355,7 +355,7 @@ public class NewGameActivity extends AppCompatActivity
                     }
 
                     Map<String, Object> childUpdates = new HashMap<>();
-                    childUpdates.put("/games/" + gameName, true);
+                    childUpdates.put("/games/" + gameName, false);
                     childUpdates.put("/areas/" + gameName, area.toMap());
                     childUpdates.put("/players/" + gameName + "/" + playerName, player.toMap());
 
@@ -373,6 +373,7 @@ public class NewGameActivity extends AppCompatActivity
         Intent intent = new Intent(this, WaitingRoomActivity.class);
         intent.putExtra("game",gameName);
         intent.putExtra("player",playerName);
+        intent.putExtra("creator",true);
         startActivity(intent);
     }
 }

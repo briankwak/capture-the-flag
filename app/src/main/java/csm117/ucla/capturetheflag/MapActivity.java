@@ -228,8 +228,6 @@ public class MapActivity extends AppCompatActivity
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        Toast.makeText(this, "Location updated",
-                Toast.LENGTH_SHORT).show();
 
         if(mMarker == null) {
             mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLongitude())).title("Marker"));

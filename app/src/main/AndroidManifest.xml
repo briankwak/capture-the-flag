@@ -28,8 +28,10 @@
         <activity
             android:name=".NewGameActivity"
             android:label="@string/new_game_name" />
-        <activity android:name=".JoinGameActivity" />
-        <activity android:name=".WaitingRoomActivity"></activity>
+        <activity android:name=".JoinGameActivity"
+            android:label="Join Game"/>
+        <activity android:name=".WaitingRoomActivity"
+            android:label="Choose A Team"/>
     </application>
 
 </manifest>
