@@ -16,18 +16,6 @@
 
 package csm117.ucla.capturetheflag;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.graphics.Color;
-import android.location.Location;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -46,56 +34,76 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Exclude;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ValueEventListener;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class NewGameActivity extends AppCompatActivity
+import csm117.ucla.capturetheflag.R;
+
+public class PlaceFlagActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>, GoogleMap.OnMapClickListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult> {
 
-    protected static final String TAG = "NewGameActivity";
+    protected static final String TAG = "PlaceFlagActivity";
     protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0x49;
     private static final float MAP_ZOOM = 15;
-
-    private static final double AREA_WIDTH = 0.0025;
-    private static final double AREA_HEIGHT = 0.0025;
 
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
     protected LocationSettingsRequest mLocationSettingsRequest;
     protected Location mCurrentLocation;
-    protected LatLng mCurrentLatLng;
     private String mLastUpdateTime;
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-    private GoogleMap mMap;
-    private Polygon mRedTeamArea;
-    private Polygon mBlueTeamArea;
-    private DatabaseReference mDatabase;
     private Marker mMarker;
+    private GoogleMap mMap;
     private LatLngInterpolator.Linear mInterpolator;
+    private String mGameName;
+    private String mPlayerName;
+    private String mTeam;
+    private DatabaseReference mDatabase;
+
+    private LatLng mRedMin;
+    private LatLng mRedMax;
+    private LatLng mBlueMin;
+    private LatLng mBlueMax;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_game);
+        setContentView(R.layout.activity_place_flag);
+
+        mGameName = getIntent().getStringExtra("game");
+        mPlayerName = getIntent().getStringExtra("player");
+        mTeam = getIntent().getStringExtra("team");
+        final boolean leader = getIntent().getExtras().getBoolean("leader");
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -105,9 +113,102 @@ public class NewGameActivity extends AppCompatActivity
         createLocationRequest();
         buildLocationSettingsRequest();
 
+        mInterpolator = new LatLngInterpolator.Linear();
+
+
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        mInterpolator = new LatLngInterpolator.Linear();
+        final LinearLayout bottomTextView = (LinearLayout)findViewById(R.id.bottomText);
+
+        mDatabase.child("areas").child(mGameName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean redFlag = false;
+                boolean blueFlag = false;
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    switch(child.getKey()){
+                        case "redFlag": redFlag = true; break;
+                        case "blueFlag": blueFlag = true; break;
+                    }
+                }
+
+                if(leader){
+                    if(mTeam.equals("blue")){
+                        if(!blueFlag){
+                            showButton();
+                        } else if(!redFlag){
+                            writeWaitingText(true);
+                        } else{
+                            // start game
+                        }
+                    } else{
+                        if(!redFlag){
+                            showButton();
+                        } else if(!blueFlag){
+                            writeWaitingText(true);
+                        } else{
+                            // start game
+                        }
+                    }
+
+                } else{
+                    if(!blueFlag || !redFlag){
+                        writeWaitingText(mTeam.equals("blue") ? blueFlag : redFlag);
+                    }
+                    else {
+                        // start game
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+            }
+        });
+    }
+
+    private void showButton() {
+        Button button = new Button(this);
+        button.setText("Place Flag at Current Location");
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                pressPlaceFlag(view);
+            }
+        });
+        LinearLayout bottomTextView = (LinearLayout)findViewById(R.id.bottomText);
+        bottomTextView.addView(button);
+    }
+
+    private void writeWaitingText(boolean flag) {
+        TextView view = new TextView(this);
+        String waitingText = "";
+        if(flag){
+            waitingText = "Waiting for other team...";
+        } else{
+            waitingText = "Waiting for team leader to place flag...";
+        }
+        view.setText(waitingText);
+
+        LinearLayout bottomTextView = (LinearLayout) findViewById(R.id.bottomText);
+        bottomTextView.removeAllViews();
+        bottomTextView.addView(view);
+    }
+
+    private void pressPlaceFlag(View view) {
+        LatLng min;
+        LatLng max;
+        if(mTeam.equals("blue")){
+            min = mBlueMin;
+            max = mBlueMax;
+        } else{
+            min = mRedMin;
+            max = mRedMax;
+        }
+        if(Area.withinArea(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()),min,max)){
+
+        } else{
+            Toast.makeText(getApplicationContext(), "Flag is not in your team's territory!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -136,8 +237,8 @@ public class NewGameActivity extends AppCompatActivity
     }
 
     /**
-     * Uses a {@link LocationSettingsRequest.Builder} to build
-     * a {@link LocationSettingsRequest} that is used for checking
+     * Uses a {@link com.google.android.gms.location.LocationSettingsRequest.Builder} to build
+     * a {@link com.google.android.gms.location.LocationSettingsRequest} that is used for checking
      * if a device has the needed location settings.
      */
     protected void buildLocationSettingsRequest() {
@@ -159,7 +260,7 @@ public class NewGameActivity extends AppCompatActivity
      * The callback invoked when
      * {@link com.google.android.gms.location.SettingsApi#checkLocationSettings(GoogleApiClient,
      * LocationSettingsRequest)} is called. Examines the
-     * {@link LocationSettingsResult} object and determines if
+     * {@link com.google.android.gms.location.LocationSettingsResult} object and determines if
      * location settings are adequate. If they are not, begins the process of presenting a location
      * settings dialog to the user.
      */
@@ -178,7 +279,7 @@ public class NewGameActivity extends AppCompatActivity
                 try {
                     // Show the dialog by calling startResolutionForResult(), and check the result
                     // in onActivityResult().
-                    status.startResolutionForResult(NewGameActivity.this, REQUEST_CHECK_SETTINGS);
+                    status.startResolutionForResult(PlaceFlagActivity.this, REQUEST_CHECK_SETTINGS);
                 } catch (IntentSender.SendIntentException e) {
                     Log.i(TAG, "PendingIntent unable to execute request.");
                 }
@@ -219,7 +320,7 @@ public class NewGameActivity extends AppCompatActivity
         if(mMarker == null && mCurrentLocation != null) {
             mMarker = map.addMarker(new MarkerOptions().position(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude())).title("Marker"));
         }
-        mMap.setOnMapClickListener(this);
+        buildRectangles();
     }
 
     @Override
@@ -228,11 +329,9 @@ public class NewGameActivity extends AppCompatActivity
         if (mCurrentLocation == null) {
 
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            mCurrentLatLng = new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude());
-            buildRectangle(mCurrentLatLng);
 
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurrentLatLng,
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()),
                     MAP_ZOOM));
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         }
@@ -241,18 +340,18 @@ public class NewGameActivity extends AppCompatActivity
 
     protected void startLocationUpdates() {
 
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    mGoogleApiClient,
-                    mLocationRequest,
-                    this
-            );
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient,
+                mLocationRequest,
+                this
+        );
     }
 
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        mCurrentLatLng = new LatLng(location.getLatitude(),location.getLongitude());
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+
         if(mMarker == null) {
             mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLongitude())).title("Marker"));
         } else{
@@ -308,85 +407,41 @@ public class NewGameActivity extends AppCompatActivity
         mGoogleApiClient.disconnect();
     }
 
-    /* buncha rectangle nonsense */
-    private void buildRectangle(LatLng latLng){
-        mRedTeamArea = mMap.addPolygon(new PolygonOptions()
-                .addAll(createRectangle(latLng, AREA_WIDTH, AREA_HEIGHT, true))
-                .fillColor(Color.argb(32, 255, 0, 0))
-                .strokeColor(Color.argb(128, 255, 0, 0))
-                .strokeWidth(10));
+    /* buncha rectangle nonsense again */
+    private void buildRectangles(){
 
-        mBlueTeamArea = mMap.addPolygon(new PolygonOptions()
-                .addAll(createRectangle(latLng, AREA_WIDTH, AREA_HEIGHT, false))
-                .fillColor(Color.argb(32, 0, 0, 255))
-                .strokeColor(Color.argb(128, 0, 0, 255))
-                .strokeWidth(10));
+        mDatabase.child("areas").child(mGameName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Area area = dataSnapshot.getValue(Area.class);
+                mRedMin = area.redMin();
+                mRedMax = area.redMax();
+                mBlueMin = area.blueMin();
+                mBlueMax = area.blueMax();
+                mMap.addPolygon(new PolygonOptions()
+                        .addAll(createRectangle(mRedMin,mRedMax))
+                        .fillColor(Color.argb(32, 255, 0, 0))
+                        .strokeColor(Color.argb(128, 255, 0, 0))
+                        .strokeWidth(10));
+
+                mMap.addPolygon(new PolygonOptions()
+                        .addAll(createRectangle(mBlueMin,mBlueMax))
+                        .fillColor(Color.argb(32, 0, 0, 255))
+                        .strokeColor(Color.argb(128, 0, 0, 255))
+                        .strokeWidth(10));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+            }
+        });
     }
 
-    private List<LatLng> createRectangle(LatLng center, double halfWidth, double halfHeight, boolean bottom) {
-        if(bottom) {
-            return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
-                    new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
-                    new LatLng(center.latitude, center.longitude + halfWidth),
-                    new LatLng(center.latitude, center.longitude - halfWidth),
-                    new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
-        } else{
-            return Arrays.asList(new LatLng(center.latitude, center.longitude - halfWidth),
-                    new LatLng(center.latitude, center.longitude + halfWidth),
-                    new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
-                    new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
-                    new LatLng(center.latitude, center.longitude - halfWidth));
-        }
-    }
-
-    @Override
-    public void onMapClick(LatLng latLng) {
-        mRedTeamArea.setPoints(createRectangle(latLng,AREA_WIDTH,AREA_HEIGHT, true));
-        mBlueTeamArea.setPoints(createRectangle(latLng,AREA_WIDTH,AREA_HEIGHT, false));
-    }
-
-    public void pressConfirm(View view){
-        EditText gameEditText = (EditText)findViewById(R.id.game_name);
-        final String gameName = gameEditText.getText().toString();
-        EditText playerEditText = (EditText)findViewById(R.id.player_name);
-        final String playerName = playerEditText.getText().toString();
-        if(gameName.length() == 0) {
-            Toast.makeText(getApplicationContext(), "Please choose a game name.", Toast.LENGTH_SHORT).show();
-        } else if(playerName.length() == 0){
-            Toast.makeText(getApplicationContext(), "Please choose a player name.", Toast.LENGTH_SHORT).show();
-        } else {
-            final Area area = new Area(mRedTeamArea.getPoints(),mBlueTeamArea.getPoints());
-            final Player player = new Player(mCurrentLatLng,System.currentTimeMillis());
-
-            mDatabase.child("games").child(gameName).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.exists()){
-                        Toast.makeText(getApplicationContext(), "Game name already in use!", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    Map<String, Object> childUpdates = new HashMap<>();
-                    childUpdates.put("/games/" + gameName, false);
-                    childUpdates.put("/areas/" + gameName, area.toMap());
-                    childUpdates.put("/players/" + gameName + "/" + playerName, player.toMap());
-
-                    mDatabase.updateChildren(childUpdates);
-                    changeActivity(gameName,playerName);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError firebaseError) {}
-            });
-
-        }
-    }
-    public void changeActivity(String gameName,String playerName){
-        Intent intent = new Intent(this, WaitingRoomActivity.class);
-        intent.putExtra("game",gameName);
-        intent.putExtra("player",playerName);
-        intent.putExtra("creator",true);
-        startActivity(intent);
+    private List<LatLng> createRectangle(LatLng min, LatLng max) {
+        return Arrays.asList(min,
+                new LatLng(min.latitude, max.longitude),
+                max,
+                new LatLng(max.latitude,min.longitude),
+                min);
     }
 }
-

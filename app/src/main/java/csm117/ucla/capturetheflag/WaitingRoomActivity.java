@@ -37,6 +37,8 @@ public class WaitingRoomActivity extends Activity {
 
     private String mGameName;
     private String mPlayerName;
+    private boolean mTeamLeader;
+    private String mTeam;
     private DatabaseReference mDatabase;
 
     private LinearLayout mBlueTeamView;
@@ -52,6 +54,9 @@ public class WaitingRoomActivity extends Activity {
         mPlayerName = getIntent().getStringExtra("player");
         boolean creator = getIntent().getExtras().getBoolean("creator");
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        mTeamLeader = false;
+        mTeam = "none";
 
         mBlueTeamView = (LinearLayout) findViewById(R.id.blueTeam);
         mRedTeamView = (LinearLayout) findViewById(R.id.redTeam);
@@ -75,9 +80,26 @@ public class WaitingRoomActivity extends Activity {
                 mBlueTeamView.removeAllViews();
                 mRedTeamView.removeAllViews();
                 mNoTeamView.removeAllViews();
+                int bluePlayers = 0;
+                int redPlayers = 0;
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     Player temp = child.getValue(Player.class);
-                    addPlayer(child.getKey(), temp);
+                    String team = temp.team;
+                    String name = child.getKey();
+                    String leader = "";
+                    if(bluePlayers == 0 && team.equals("blue")){
+                        bluePlayers++;
+                        leader = " (LEADER)";
+                        mTeamLeader = name.equals(mPlayerName);
+                    } else if(redPlayers == 0 && team.equals("red")){
+                        redPlayers++;
+                        leader = " (LEADER)";
+                        mTeamLeader = name.equals(mPlayerName);
+                    }
+                    if(name.equals(mPlayerName)){
+                        mTeam = team;
+                    }
+                    addPlayer(child.getKey()+leader, team);
                 }
             }
 
@@ -107,10 +129,10 @@ public class WaitingRoomActivity extends Activity {
         });
     }
 
-    public void addPlayer(String key, Player value) {
+    public void addPlayer(String key, String team) {
         TextView view = new TextView(this);
         view.setText(key);
-        switch (value.team) {
+        switch (team) {
             case "none":
                 mNoTeamView.addView(view);
                 break;
@@ -145,7 +167,11 @@ public class WaitingRoomActivity extends Activity {
     }
 
     public void startGame(){
-        Intent intent = new Intent(this,MapActivity.class);
+        Intent intent = new Intent(this,PlaceFlagActivity.class);
+        intent.putExtra("game",mGameName);
+        intent.putExtra("player",mPlayerName);
+        intent.putExtra("leader",mTeamLeader);
+        intent.putExtra("team",mTeam);
         startActivity(intent);
 
 
@@ -173,16 +199,32 @@ public class WaitingRoomActivity extends Activity {
                 Random rand = new Random();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     Player temp = child.getValue(Player.class);
-                    if(bluePlayers < redPlayers){
-                        temp.team = "blue";
-                        bluePlayers++;
-                    } else if(redPlayers < bluePlayers){
-                        temp.team = "red";
-                        redPlayers++;
-                    } else {
-                        temp.team = (rand.nextInt(2) == 0) ? "red" : "blue";
+                    String team = temp.team;
+                    if(team.equals("none")) {
+                        if (bluePlayers < redPlayers) {
+                            team = "blue";
+                            bluePlayers++;
+                        } else if (redPlayers < bluePlayers) {
+                            team = "red";
+                            redPlayers++;
+                        } else {
+                            team = (rand.nextInt(2) == 0) ? "red" : "blue";
+                        }
                     }
-                    addPlayer(child.getKey(), temp);
+                    String name = child.getKey();
+                    String leader = "";
+                    if(bluePlayers == 1 && team.equals("blue")){
+                        leader = " (LEADER)";
+                        mTeamLeader = name.equals(mPlayerName);
+                    } else if(redPlayers == 1 && team.equals("red")){
+                        leader = " (LEADER)";
+                        mTeamLeader = name.equals(mPlayerName);
+                    }
+                    if(name.equals(mPlayerName)){
+                        mTeam = team;
+                    }
+                    addPlayer(child.getKey()+leader, team);
+
                 }
             }
 
