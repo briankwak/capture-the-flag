@@ -11,13 +11,15 @@ import java.util.Map;
  */
 
 public class Player{
-    public LatLng latLng;
+    public double lat;
+    public double lng;
     public String team;
     public long time;
 
     public Player(){}
     public Player(LatLng latLng,long time){
-        this.latLng = latLng;
+        this.lat = latLng.latitude;
+        this.lng = latLng.longitude;
         this.team = "none";
         this.time = time;
     }
@@ -25,9 +27,14 @@ public class Player{
     @Exclude
     public Map<String,Object> toMap(){
         HashMap<String,Object> location = new HashMap<>();
-        location.put("location",latLng);
+        location.put("lat",lat);
+        location.put("lng",lng);
         location.put("team",team);
         location.put("time",time);
         return location;
+    }
+
+    public LatLng getLatLng(){
+        return new LatLng(lat,lng);
     }
 }

@@ -31,6 +31,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -60,6 +61,7 @@ import android.widget.Toast;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import csm117.ucla.capturetheflag.R;
@@ -94,6 +96,13 @@ public class PlaceFlagActivity extends AppCompatActivity
     private LatLng mRedMax;
     private LatLng mBlueMin;
     private LatLng mBlueMax;
+    private LatLng mRedFlag;
+    private LatLng mBlueFlag;
+
+    private Marker mRedFlagMarker;
+    private Marker mBlueFlagMarker;
+
+    private HashMap<String,Marker> mPlayerMarkers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +113,8 @@ public class PlaceFlagActivity extends AppCompatActivity
         mPlayerName = getIntent().getStringExtra("player");
         mTeam = getIntent().getStringExtra("team");
         final boolean leader = getIntent().getExtras().getBoolean("leader");
+
+        mPlayerMarkers = new HashMap<>();
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -123,12 +134,22 @@ public class PlaceFlagActivity extends AppCompatActivity
         mDatabase.child("areas").child(mGameName).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                boolean redFlag = false;
-                boolean blueFlag = false;
-                for(DataSnapshot child : dataSnapshot.getChildren()){
-                    switch(child.getKey()){
-                        case "redFlag": redFlag = true; break;
-                        case "blueFlag": blueFlag = true; break;
+                Area area = dataSnapshot.getValue(Area.class);
+                boolean redFlag = area.redFlag;
+                boolean blueFlag = area.blueFlag;
+                mRedFlag = area.redFlag();
+                mBlueFlag = area.blueFlag();
+
+                if(mTeam.equals("blue")){
+                    if(blueFlag && mBlueFlagMarker == null){
+                        mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag"));
+                        mBlueFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    }
+                } else{
+                    Toast.makeText(getApplicationContext(), "flag should exist i guess", Toast.LENGTH_SHORT).show();
+                    if(redFlag && mRedFlagMarker == null){
+                        mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag"));
+                        mRedFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
                     }
                 }
 
@@ -158,6 +179,35 @@ public class PlaceFlagActivity extends AppCompatActivity
                     else {
                         // start game
                     }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+            }
+        });
+
+        mDatabase.child("players").child(mGameName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    String name = child.getKey();
+                    //if(!name.equals(mPlayerName)){
+                        Player player = child.getValue(Player.class);
+                        Marker m = mPlayerMarkers.get(name);
+                        if(m != null) {
+                            MarkerAnimation.animateMarkerToICS(m,player.getLatLng(),mInterpolator);
+
+                        } else{
+                            m = mMap.addMarker(new MarkerOptions().position(player.getLatLng()).title(name));
+                            if(player.team.equals("blue")) {
+                                m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                            } else{
+                                m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                            }
+                            mPlayerMarkers.put(name,m);
+                        }
+                    //}
                 }
             }
 
@@ -204,8 +254,18 @@ public class PlaceFlagActivity extends AppCompatActivity
             min = mRedMin;
             max = mRedMax;
         }
-        if(Area.withinArea(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()),min,max)){
-
+        double lat = mCurrentLocation.getLatitude();
+        double lng = mCurrentLocation.getLongitude();
+        if(Area.withinArea(new LatLng(lat,lng),min,max)){
+            if(mTeam.equals("blue")){
+                mDatabase.child("areas").child(mGameName).child("blueFlagLat").setValue(lat);
+                mDatabase.child("areas").child(mGameName).child("blueFlagLong").setValue(lng);
+                mDatabase.child("areas").child(mGameName).child("blueFlag").setValue(true);
+            } else{
+                mDatabase.child("areas").child(mGameName).child("redFlagLat").setValue(lat);
+                mDatabase.child("areas").child(mGameName).child("redFlagLong").setValue(lng);
+                mDatabase.child("areas").child(mGameName).child("redFlag").setValue(true);
+            }
         } else{
             Toast.makeText(getApplicationContext(), "Flag is not in your team's territory!", Toast.LENGTH_SHORT).show();
         }
@@ -317,9 +377,9 @@ public class PlaceFlagActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
-        if(mMarker == null && mCurrentLocation != null) {
-            mMarker = map.addMarker(new MarkerOptions().position(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude())).title("Marker"));
-        }
+//        if(mMarker == null && mCurrentLocation != null) {
+//            mMarker = map.addMarker(new MarkerOptions().position(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude())).title("Marker"));
+//        }
         buildRectangles();
     }
 
@@ -329,6 +389,8 @@ public class PlaceFlagActivity extends AppCompatActivity
         if (mCurrentLocation == null) {
 
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            mDatabase.child("players").child(mGameName).child(mPlayerName).child("lat").setValue(mCurrentLocation.getLatitude());
+            mDatabase.child("players").child(mGameName).child(mPlayerName).child("lng").setValue(mCurrentLocation.getLongitude());
 
 
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()),
@@ -351,13 +413,17 @@ public class PlaceFlagActivity extends AppCompatActivity
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        mDatabase.child("players").child(mGameName).child(mPlayerName).child("lat").setValue(mCurrentLocation.getLatitude());
+        mDatabase.child("players").child(mGameName).child(mPlayerName).child("lng").setValue(mCurrentLocation.getLongitude());
 
-        if(mMarker == null) {
-            mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLongitude())).title("Marker"));
-        } else{
-            //mMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
-            MarkerAnimation.animateMarkerToICS(mMarker,new LatLng(location.getLatitude(),location.getLongitude()),mInterpolator);
-        }
+
+
+//        if(mMarker == null) {
+//            mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLongitude())).title("Marker"));
+//        } else{
+//            //mMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
+//            MarkerAnimation.animateMarkerToICS(mMarker,new LatLng(location.getLatitude(),location.getLongitude()),mInterpolator);
+//        }
     }
 
     @Override
@@ -410,7 +476,7 @@ public class PlaceFlagActivity extends AppCompatActivity
     /* buncha rectangle nonsense again */
     private void buildRectangles(){
 
-        mDatabase.child("areas").child(mGameName).addValueEventListener(new ValueEventListener() {
+        mDatabase.child("areas").child(mGameName).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Area area = dataSnapshot.getValue(Area.class);

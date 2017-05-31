@@ -21,6 +21,8 @@ public class Area{
     public double redFlagLat;
     public double blueFlagLong;
     public double redFlagLong;
+    public boolean redFlag;
+    public boolean blueFlag;
 
     public Area(){
     }

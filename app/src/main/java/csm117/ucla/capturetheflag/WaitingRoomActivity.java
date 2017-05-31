@@ -181,8 +181,6 @@ public class WaitingRoomActivity extends Activity {
         mDatabase.child("players").child(mGameName).orderByChild("time").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mBlueTeamView.removeAllViews();
-                mRedTeamView.removeAllViews();
                 mNoTeamView.removeAllViews();
 
                 int bluePlayers = 0;
@@ -203,28 +201,27 @@ public class WaitingRoomActivity extends Activity {
                     if(team.equals("none")) {
                         if (bluePlayers < redPlayers) {
                             team = "blue";
-                            bluePlayers++;
                         } else if (redPlayers < bluePlayers) {
                             team = "red";
-                            redPlayers++;
                         } else {
                             team = (rand.nextInt(2) == 0) ? "red" : "blue";
                         }
-                    }
-                    String name = child.getKey();
-                    String leader = "";
-                    if(bluePlayers == 1 && team.equals("blue")){
-                        leader = " (LEADER)";
-                        mTeamLeader = name.equals(mPlayerName);
-                    } else if(redPlayers == 1 && team.equals("red")){
-                        leader = " (LEADER)";
-                        mTeamLeader = name.equals(mPlayerName);
-                    }
-                    if(name.equals(mPlayerName)){
-                        mTeam = team;
-                    }
-                    addPlayer(child.getKey()+leader, team);
+                        String name = child.getKey();
+                        String leader = "";
+                        if(bluePlayers == 0 && team.equals("blue")){
+                            leader = " (LEADER)";
+                            mTeamLeader = name.equals(mPlayerName);
+                        } else if(redPlayers == 0 && team.equals("red")){
+                            leader = " (LEADER)";
+                            mTeamLeader = name.equals(mPlayerName);
+                        }
+                        if(team.equals("blue")) bluePlayers++; else redPlayers++;
+                        if(name.equals(mPlayerName)){
+                            mTeam = team;
+                        }
+                        addPlayer(child.getKey()+leader, team);
 
+                    }
                 }
             }
 
