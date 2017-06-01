@@ -203,14 +203,16 @@ public class PlaceFlagActivity extends AppCompatActivity
                         Marker m = mPlayerMarkers.get(name);
                         LatLng playerLoc = player.getLatLng();
                         if(m != null) {
-                            MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
+                            m.setPosition(playerLoc);
+                            //MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
                             if(name.equals(mPlayerName)){
-                                MarkerAnimation.animateCircle(mCircle,playerLoc,mInterpolator);
-                                MarkerAnimation.animateCircle(mInnerCircle,playerLoc,mInterpolator);
+                                mCircle.setCenter(playerLoc);
+                                mInnerCircle.setCenter(playerLoc);
                                 
                             }
-                            m.setVisible(Area.withinCircle(playerLoc,mCircle));
-
+                            if(!player.team.equals(mTeam)) {
+                                m.setVisible(Area.withinCircle(playerLoc, mCircle));
+                            }
                         } else{
                             if(name.equals(mPlayerName)){
                                 mCircle = mMap.addCircle(new CircleOptions()
@@ -230,7 +232,12 @@ public class PlaceFlagActivity extends AppCompatActivity
 
 
                             m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name));
-                            m.setVisible(Area.withinCircle(playerLoc,mCircle));
+
+                            if(!player.team.equals(mTeam) && mCircle != null) {
+                                m.setVisible(Area.withinCircle(playerLoc, mCircle));
+                            } else{
+                                m.setVisible(true);
+                            }
                             if(player.team.equals("blue")) {
                                 m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                             } else{
@@ -257,6 +264,7 @@ public class PlaceFlagActivity extends AppCompatActivity
             }
         });
         LinearLayout bottomTextView = (LinearLayout)findViewById(R.id.bottomText);
+        bottomTextView.removeAllViews();
         bottomTextView.addView(button);
     }
 
