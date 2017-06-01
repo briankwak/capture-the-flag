@@ -1,5 +1,8 @@
 package csm117.ucla.capturetheflag;
 
+import android.location.Location;
+
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
@@ -72,5 +75,15 @@ public class Area{
 
     public static boolean withinArea(LatLng x, LatLng min, LatLng max){
         return min.latitude <= x.latitude && x.latitude <= max.latitude && min.longitude <= x.longitude && x.longitude <= max.longitude;
+    }
+
+    public static boolean withinCircle(LatLng x, Circle circle){
+        float[] distance = new float[2];
+
+        LatLng center = circle.getCenter();
+        Location.distanceBetween( x.latitude, x.longitude,
+                center.latitude, center.longitude, distance);
+
+        return distance[0] <= circle.getRadius();
     }
 }

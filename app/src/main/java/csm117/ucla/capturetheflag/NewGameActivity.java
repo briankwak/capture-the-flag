@@ -254,10 +254,10 @@ public class NewGameActivity extends AppCompatActivity
         mCurrentLatLng = new LatLng(location.getLatitude(),location.getLongitude());
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         if(mMarker == null) {
-            mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),location.getLongitude())).title("Marker"));
+            mMarker = mMap.addMarker(new MarkerOptions().position(mCurrentLatLng).title("Marker"));
         } else{
-            //mMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
-            MarkerAnimation.animateMarkerToICS(mMarker,new LatLng(location.getLatitude(),location.getLongitude()),mInterpolator);
+            mMarker.setPosition(mCurrentLatLng);
+            //MarkerAnimation.animateMarkerToICS(mMarker,new LatLng(location.getLatitude(),location.getLongitude()),mInterpolator);
         }
     }
 
