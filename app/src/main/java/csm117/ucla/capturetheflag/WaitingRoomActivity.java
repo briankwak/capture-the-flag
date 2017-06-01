@@ -90,14 +90,14 @@ public class WaitingRoomActivity extends Activity {
                     if(bluePlayers == 0 && team.equals("blue")){
                         bluePlayers++;
                         leader = " (LEADER)";
-                        mTeamLeader = name.equals(mPlayerName);
                     } else if(redPlayers == 0 && team.equals("red")){
                         redPlayers++;
                         leader = " (LEADER)";
-                        mTeamLeader = name.equals(mPlayerName);
                     }
                     if(name.equals(mPlayerName)){
                         mTeam = team;
+                        mTeamLeader = !leader.equals("");
+
                     }
                     addPlayer(child.getKey()+leader, team);
                 }
@@ -210,16 +210,16 @@ public class WaitingRoomActivity extends Activity {
                         String leader = "";
                         if(bluePlayers == 0 && team.equals("blue")){
                             leader = " (LEADER)";
-                            mTeamLeader = name.equals(mPlayerName);
                         } else if(redPlayers == 0 && team.equals("red")){
                             leader = " (LEADER)";
-                            mTeamLeader = name.equals(mPlayerName);
                         }
                         if(team.equals("blue")) bluePlayers++; else redPlayers++;
                         if(name.equals(mPlayerName)){
                             mTeam = team;
+                            mTeamLeader = !leader.equals("");
                         }
                         addPlayer(child.getKey()+leader, team);
+                        mDatabase.child("players").child(mGameName).child(name).child("team").setValue(team);
 
                     }
                 }

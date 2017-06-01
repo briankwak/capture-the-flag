@@ -146,7 +146,6 @@ public class PlaceFlagActivity extends AppCompatActivity
                         mBlueFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
                     }
                 } else{
-                    Toast.makeText(getApplicationContext(), "flag should exist i guess", Toast.LENGTH_SHORT).show();
                     if(redFlag && mRedFlagMarker == null){
                         mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag"));
                         mRedFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
