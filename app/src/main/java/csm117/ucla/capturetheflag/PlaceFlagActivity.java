@@ -32,6 +32,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -73,6 +75,8 @@ public class PlaceFlagActivity extends AppCompatActivity
     protected static final String TAG = "PlaceFlagActivity";
     protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0x49;
     private static final float MAP_ZOOM = 15;
+    private static final double OUTER_CIRCLE_RADIUS = 100;
+    private static final double INNER_CIRCLE_RADIUS = 25;
 
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
@@ -103,6 +107,9 @@ public class PlaceFlagActivity extends AppCompatActivity
     private Marker mBlueFlagMarker;
 
     private HashMap<String,Marker> mPlayerMarkers;
+
+    private Circle mCircle;
+    private Circle mInnerCircle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,11 +201,36 @@ public class PlaceFlagActivity extends AppCompatActivity
                     //if(!name.equals(mPlayerName)){
                         Player player = child.getValue(Player.class);
                         Marker m = mPlayerMarkers.get(name);
+                        LatLng playerLoc = player.getLatLng();
                         if(m != null) {
-                            MarkerAnimation.animateMarkerToICS(m,player.getLatLng(),mInterpolator);
+                            MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
+                            if(name.equals(mPlayerName)){
+                                MarkerAnimation.animateCircle(mCircle,playerLoc,mInterpolator);
+                                MarkerAnimation.animateCircle(mInnerCircle,playerLoc,mInterpolator);
+                                
+                            }
+                            m.setVisible(Area.withinCircle(playerLoc,mCircle));
 
                         } else{
-                            m = mMap.addMarker(new MarkerOptions().position(player.getLatLng()).title(name));
+                            if(name.equals(mPlayerName)){
+                                mCircle = mMap.addCircle(new CircleOptions()
+                                        .center(playerLoc)
+                                        .radius(OUTER_CIRCLE_RADIUS)
+                                        .fillColor(Color.argb(64, 255, 255, 255))
+                                        .strokeColor(Color.argb(192, 255, 255, 255)));
+                                mCircle.setZIndex(1);
+
+                                mInnerCircle = mMap.addCircle(new CircleOptions()
+                                        .center(playerLoc)
+                                        .radius(INNER_CIRCLE_RADIUS)
+                                        .fillColor(Color.argb(32, 255, 255, 0))
+                                        .strokeColor(Color.argb(192, 255, 255, 0)));
+                                mInnerCircle.setZIndex(1);
+                            }
+
+
+                            m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name));
+                            m.setVisible(Area.withinCircle(playerLoc,mCircle));
                             if(player.team.equals("blue")) {
                                 m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                             } else{
