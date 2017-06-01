@@ -16,6 +16,22 @@
 
 package csm117.ucla.capturetheflag;
 
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentSender;
+import android.graphics.Color;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -42,29 +58,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.location.Location;
-import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import csm117.ucla.capturetheflag.R;
 
 public class PlaceFlagActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
@@ -103,6 +101,29 @@ public class PlaceFlagActivity extends AppCompatActivity
     private Marker mBlueFlagMarker;
 
     private HashMap<String,Marker> mPlayerMarkers;
+
+    @Override
+    public void onBackPressed()
+    {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Return from Map");
+        builder.setMessage("Would you like to exit from the game and return to the home menu?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                startActivity(new Intent(PlaceFlagActivity.this, MainActivity.class));
+                finish();
+            }
+        });
+        builder.setNegativeButton("No", null);
+
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -509,4 +530,8 @@ public class PlaceFlagActivity extends AppCompatActivity
                 new LatLng(max.latitude,min.longitude),
                 min);
     }
+
+
+
+
 }
