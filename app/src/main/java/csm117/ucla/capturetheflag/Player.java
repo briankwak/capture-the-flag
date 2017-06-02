@@ -15,6 +15,7 @@ public class Player{
     public double lng;
     public String team;
     public long time;
+    public boolean dead;
 
     public Player(){}
     public Player(LatLng latLng,long time){

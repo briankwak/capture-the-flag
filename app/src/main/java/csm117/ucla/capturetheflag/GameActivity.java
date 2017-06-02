@@ -68,7 +68,8 @@ import java.util.List;
 
 public class GameActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult> {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>,
+        GoogleMap.OnMarkerClickListener {
 
     protected static final String TAG = "GameActivity";
     protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0x49;
@@ -93,6 +94,7 @@ public class GameActivity extends AppCompatActivity
     private String mPlayerName;
     private String mTeam;
     private DatabaseReference mDatabase;
+    private boolean mDead;
 
     private LatLng mRedMin;
     private LatLng mRedMax;
@@ -202,6 +204,8 @@ public class GameActivity extends AppCompatActivity
                     Marker m = mPlayerMarkers.get(name);
                     LatLng playerLoc = player.getLatLng();
                     if(m != null) {
+
+                        mDead = player.dead;
                         m.setPosition(playerLoc);
                         //MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
                         if(name.equals(mPlayerName)){
@@ -227,12 +231,16 @@ public class GameActivity extends AppCompatActivity
                                     .fillColor(Color.argb(32, 255, 255, 0))
                                     .strokeColor(Color.argb(192, 255, 255, 0)));
                             mInnerCircle.setZIndex(1);
+
+                            mDead = player.dead;
                         }
 
 
                         m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name));
 
-                        if(!player.team.equals(mTeam) && mCircle != null) {
+                        if(player.dead){
+                            m.setVisible(false);
+                        } else if(!player.team.equals(mTeam) && mCircle != null) {
                             m.setVisible(Area.withinCircle(playerLoc, mCircle));
                         } else{
                             m.setVisible(true);
@@ -252,6 +260,9 @@ public class GameActivity extends AppCompatActivity
             public void onCancelled(DatabaseError firebaseError) {
             }
         });
+
+
+        mMap.setOnMarkerClickListener(this);
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -492,6 +503,13 @@ public class GameActivity extends AppCompatActivity
                 max,
                 new LatLng(max.latitude,min.longitude),
                 min);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker){
+        Toast.makeText(getApplicationContext(),"blah blah blah",Toast.LENGTH_SHORT);
+        mDatabase.child("players").child(mGameName).child(marker.getTitle()).child("dead").setValue(true);
+        return true;
     }
 
 
