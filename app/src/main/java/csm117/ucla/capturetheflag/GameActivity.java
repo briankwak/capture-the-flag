@@ -262,7 +262,6 @@ public class GameActivity extends AppCompatActivity
         });
 
 
-        mMap.setOnMarkerClickListener(this);
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -374,6 +373,7 @@ public class GameActivity extends AppCompatActivity
 //        if(mMarker == null && mCurrentLocation != null) {
 //            mMarker = map.addMarker(new MarkerOptions().position(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude())).title("Marker"));
 //        }
+        mMap.setOnMarkerClickListener(this);
         buildRectangles();
     }
 
