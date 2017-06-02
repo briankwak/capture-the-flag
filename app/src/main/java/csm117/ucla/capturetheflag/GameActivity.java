@@ -232,7 +232,7 @@ public class GameActivity extends AppCompatActivity
 
                         if(player.dead){
                             m.setVisible(false);
-                        } else if(!player.team.equals(mTeam) && mCircle != null) {
+                        } else if((!player.team.equals(mTeam) && mCircle != null)) {
                             m.setVisible(Area.withinCircle(playerLoc, mCircle));
                         } else{
                             m.setVisible(true);
@@ -522,6 +522,7 @@ public class GameActivity extends AppCompatActivity
         } else{
             // what happens when you take the flag?????
             // write code here
+            mDatabase.child("players").child(mGameName).child(mPlayerName).child("has_flag").setValue(true);
 
         }
         return true;

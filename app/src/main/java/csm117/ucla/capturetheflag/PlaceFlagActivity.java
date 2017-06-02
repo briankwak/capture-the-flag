@@ -78,6 +78,7 @@ public class PlaceFlagActivity extends AppCompatActivity
     private static final float MAP_ZOOM = 15;
     private static final double OUTER_CIRCLE_RADIUS = 100;
     private static final double INNER_CIRCLE_RADIUS = 25;
+    private static final float ANCHOR_VALUE = 0.5f;
 
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
@@ -256,7 +257,10 @@ public class PlaceFlagActivity extends AppCompatActivity
                             }
 
 
-                            m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name));
+                            m = mMap.addMarker(new MarkerOptions()
+                                                    .position(playerLoc)
+                                                    .title(name)
+                                                    .anchor(ANCHOR_VALUE,ANCHOR_VALUE));
 
                             if(!player.team.equals(mTeam) && mCircle != null) {
                                 m.setVisible(Area.withinCircle(playerLoc, mCircle));

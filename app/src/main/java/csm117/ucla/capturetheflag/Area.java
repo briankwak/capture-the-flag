@@ -5,7 +5,6 @@ import android.location.Location;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +23,8 @@ public class Area{
     public double redFlagLat;
     public double blueFlagLong;
     public double redFlagLong;
-    public boolean redFlag;
-    public boolean blueFlag;
+    public boolean redFlag;  //placed
+    public boolean blueFlag; // placed
 
     public Area(){
     }
@@ -86,4 +85,5 @@ public class Area{
 
         return distance[0] <= circle.getRadius();
     }
+
 }
