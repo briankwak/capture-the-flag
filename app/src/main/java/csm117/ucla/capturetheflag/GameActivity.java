@@ -64,6 +64,7 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class GameActivity extends AppCompatActivity
@@ -111,6 +112,8 @@ public class GameActivity extends AppCompatActivity
     private Circle mCircle;
     private Circle mInnerCircle;
 
+    private HashSet<String> mMyTeam;
+
     @Override
     public void onBackPressed()
     {
@@ -144,6 +147,7 @@ public class GameActivity extends AppCompatActivity
         mTeam = getIntent().getStringExtra("team");
 
         mPlayerMarkers = new HashMap<>();
+        mMyTeam = new HashSet<>();
 
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -178,6 +182,23 @@ public class GameActivity extends AppCompatActivity
                     mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag").anchor(0.0f, 1.0f));
                     mRedFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.redflag));
                     mRedFlagMarker.setVisible(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+            }
+        });
+
+        mDatabase.child("players").child(mGameName).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot child : dataSnapshot.getChildren()) {
+                    String name = child.getKey();
+                    Player player = child.getValue(Player.class);
+                    if(mTeam.equals(player.team)){
+                        mMyTeam.add(name);
+                    }
                 }
             }
 
@@ -520,9 +541,10 @@ public class GameActivity extends AppCompatActivity
 
     @Override
     public boolean onMarkerClick(Marker marker){
-        if(mPlayerMarkers.containsValue(marker)) {
+        String name = marker.getTitle();
+        if(mPlayerMarkers.containsKey(name) && !mMyTeam.contains(name) && !mDead && withinTerritory()) {
             Toast.makeText(getApplicationContext(), "blah blah blah", Toast.LENGTH_SHORT);
-            mDatabase.child("players").child(mGameName).child(marker.getTitle()).child("dead").setValue(true);
+            mDatabase.child("players").child(mGameName).child(name).child("dead").setValue(true);
         } else{
             // what happens when you take the flag?????
             // write code here
@@ -531,7 +553,9 @@ public class GameActivity extends AppCompatActivity
         return true;
     }
 
-
+    private boolean withinTerritory() {
+        return true;
+    }
 
 
 }
