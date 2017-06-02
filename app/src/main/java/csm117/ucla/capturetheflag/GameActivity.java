@@ -170,13 +170,13 @@ public class GameActivity extends AppCompatActivity
                 mBlueFlag = area.blueFlag();
 
                 if(blueFlag && mBlueFlagMarker == null){
-                    mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag"));
-                    mBlueFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag").anchor(0.0f,1.0f));
+                    mBlueFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueflag));
                     mBlueFlagMarker.setVisible(false);
                 }
                 if(redFlag && mRedFlagMarker == null){
-                    mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag"));
-                    mRedFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+                    mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag").anchor(0.0f, 1.0f));
+                    mRedFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.redflag));
                     mRedFlagMarker.setVisible(false);
                 }
             }
@@ -228,7 +228,7 @@ public class GameActivity extends AppCompatActivity
                         }
 
 
-                        m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name));
+                        m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name).anchor(0.5f,0.5f));
 
                         if(player.dead){
                             m.setVisible(false);
@@ -255,9 +255,9 @@ public class GameActivity extends AppCompatActivity
                         }
 
                         if(player.team.equals("blue")) {
-                            m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                            m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueplayermarker));
                         } else{
-                            m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                            m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.redplayermarker));
                         }
                         mPlayerMarkers.put(name,m);
                     }

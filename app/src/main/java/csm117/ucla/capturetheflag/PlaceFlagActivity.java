@@ -173,13 +173,13 @@ public class PlaceFlagActivity extends AppCompatActivity
                 mBlueFlag = area.blueFlag();
 
                 if(blueFlag && mBlueFlagMarker == null){
-                    mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag"));
-                    mBlueFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag").anchor(0.0f,1.0f));
+                    mBlueFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueflag));
                     mBlueFlagMarker.setVisible(false);
                 }
                 if(redFlag && mRedFlagMarker == null){
-                    mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag"));
-                    mRedFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+                    mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag").anchor(0.0f,1.0f));
+                    mRedFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.redflag));
                     mRedFlagMarker.setVisible(false);
                 }
 
