@@ -238,6 +238,8 @@ public class PlaceFlagActivity extends AppCompatActivity
                             }
                             if(!player.team.equals(mTeam)) {
                                 m.setVisible(Area.withinCircle(playerLoc, mCircle));
+                            } else{
+                                m.setVisible(true);
                             }
                         } else{
                             if(name.equals(mPlayerName)){
@@ -273,7 +275,8 @@ public class PlaceFlagActivity extends AppCompatActivity
                                 } else{
                                     mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
                                 }
-                            } else if(mCircle != null && mRedFlagMarker != null){
+                            }
+                            if(mCircle != null && mRedFlagMarker != null){
                                 if(mTeam.equals("red")){
                                     mRedFlagMarker.setVisible(true);
                                 } else{

@@ -196,8 +196,6 @@ public class GameActivity extends AppCompatActivity
                     Marker m = mPlayerMarkers.get(name);
                     LatLng playerLoc = player.getLatLng();
                     if(m != null) {
-
-
                         m.setPosition(playerLoc);
                         //MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
                         if(name.equals(mPlayerName)){
@@ -206,8 +204,12 @@ public class GameActivity extends AppCompatActivity
                             mDead = player.dead;
 
                         }
-                        if(!player.team.equals(mTeam)) {
+                        if(player.dead){
+                            m.setVisible(false);
+                        } else if(!player.team.equals(mTeam)) {
                             m.setVisible(Area.withinCircle(playerLoc, mCircle));
+                        } else{
+                            m.setVisible(true);
                         }
                     } else{
                         if(name.equals(mPlayerName)){
@@ -246,7 +248,8 @@ public class GameActivity extends AppCompatActivity
                             } else{
                                 mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
                             }
-                        } else if(mCircle != null && mRedFlagMarker != null){
+                        }
+                        if(mCircle != null && mRedFlagMarker != null){
                             if(mTeam.equals("red")){
                                 mRedFlagMarker.setVisible(true);
                             } else{
