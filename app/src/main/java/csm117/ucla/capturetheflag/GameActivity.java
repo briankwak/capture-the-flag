@@ -507,8 +507,14 @@ public class GameActivity extends AppCompatActivity
 
     @Override
     public boolean onMarkerClick(Marker marker){
-        Toast.makeText(getApplicationContext(),"blah blah blah",Toast.LENGTH_SHORT);
-        mDatabase.child("players").child(mGameName).child(marker.getTitle()).child("dead").setValue(true);
+        if(mPlayerMarkers.containsValue(marker)) {
+            Toast.makeText(getApplicationContext(), "blah blah blah", Toast.LENGTH_SHORT);
+            mDatabase.child("players").child(mGameName).child(marker.getTitle()).child("dead").setValue(true);
+        } else{
+            // what happens when you take the flag?????
+            // write code here
+
+        }
         return true;
     }
 
