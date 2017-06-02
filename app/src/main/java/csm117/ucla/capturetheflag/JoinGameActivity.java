@@ -46,6 +46,7 @@ public class JoinGameActivity extends AppCompatActivity {
                     if(dataSnapshot.exists()){
                         if((boolean)dataSnapshot.getValue()){
                             Toast.makeText(getApplicationContext(), "Game already in progress", Toast.LENGTH_SHORT).show();
+                            return;
                         }
                         handleKey(gameName);
                         return;

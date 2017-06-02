@@ -172,20 +172,12 @@ public class GameActivity extends AppCompatActivity
                 if(blueFlag && mBlueFlagMarker == null){
                     mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag"));
                     mBlueFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                    mBlueFlagMarker.setVisible(false);
                 }
                 if(redFlag && mRedFlagMarker == null){
                     mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag"));
                     mRedFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
-                }
-
-                if(mCircle != null){
-                    if(mTeam.equals("blue")){
-                        mBlueFlagMarker.setVisible(true);
-                        mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
-                    } else{
-                        mRedFlagMarker.setVisible(true);
-                        mBlueFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
-                    }
+                    mRedFlagMarker.setVisible(false);
                 }
             }
 
@@ -245,6 +237,23 @@ public class GameActivity extends AppCompatActivity
                         } else{
                             m.setVisible(true);
                         }
+
+
+                        if(mCircle != null && mBlueFlagMarker != null){
+                            if(mTeam.equals("blue")){
+                                mBlueFlagMarker.setVisible(true);
+                            } else{
+                                mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
+                            }
+                        } else if(mCircle != null && mRedFlagMarker != null){
+                            if(mTeam.equals("red")){
+                                mRedFlagMarker.setVisible(true);
+                            } else{
+                                mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
+                            }
+
+                        }
+
                         if(player.team.equals("blue")) {
                             m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                         } else{

@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -277,9 +279,9 @@ public class PlaceFlagActivity extends AppCompatActivity
                             }
 
                             if(player.team.equals("blue")) {
-                                m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                                m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueplayermarker));
                             } else{
-                                m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                                m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.redplayermarker));
                             }
                             mPlayerMarkers.put(name,m);
                         }

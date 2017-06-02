@@ -16,6 +16,7 @@ public class Player{
     public String team;
     public long time;
     public boolean dead;
+    public boolean hasFlag;
 
     public Player(){}
     public Player(LatLng latLng,long time){
