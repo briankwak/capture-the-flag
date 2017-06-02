@@ -197,12 +197,13 @@ public class GameActivity extends AppCompatActivity
                     LatLng playerLoc = player.getLatLng();
                     if(m != null) {
 
-                        mDead = player.dead;
+
                         m.setPosition(playerLoc);
                         //MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
                         if(name.equals(mPlayerName)){
                             mCircle.setCenter(playerLoc);
                             mInnerCircle.setCenter(playerLoc);
+                            mDead = player.dead;
 
                         }
                         if(!player.team.equals(mTeam)) {
@@ -522,7 +523,6 @@ public class GameActivity extends AppCompatActivity
         } else{
             // what happens when you take the flag?????
             // write code here
-            mDatabase.child("players").child(mGameName).child(mPlayerName).child("has_flag").setValue(true);
 
         }
         return true;
