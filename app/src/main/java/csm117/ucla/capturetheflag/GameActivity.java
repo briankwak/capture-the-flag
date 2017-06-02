@@ -23,7 +23,6 @@ import android.content.IntentSender;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -67,11 +66,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class PlaceFlagActivity extends AppCompatActivity
+public class GameActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult> {
 
-    protected static final String TAG = "PlaceFlagActivity";
+    protected static final String TAG = "GameActivity";
     protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0x49;
     private static final float MAP_ZOOM = 15;
     private static final double OUTER_CIRCLE_RADIUS = 100;
@@ -119,7 +118,7 @@ public class PlaceFlagActivity extends AppCompatActivity
         builder.setMessage("Would you like to exit from the game and return to the home menu?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                startActivity(new Intent(PlaceFlagActivity.this, MainActivity.class));
+                startActivity(new Intent(GameActivity.this, MainActivity.class));
                 finish();
             }
         });
@@ -136,12 +135,11 @@ public class PlaceFlagActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_place_flag);
+        setContentView(R.layout.activity_game);
 
         mGameName = getIntent().getStringExtra("game");
         mPlayerName = getIntent().getStringExtra("player");
         mTeam = getIntent().getStringExtra("team");
-        final boolean leader = getIntent().getExtras().getBoolean("leader");
 
         mPlayerMarkers = new HashMap<>();
 
@@ -172,39 +170,19 @@ public class PlaceFlagActivity extends AppCompatActivity
                 if(blueFlag && mBlueFlagMarker == null){
                     mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag"));
                     mBlueFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-                    mBlueFlagMarker.setVisible(false);
                 }
                 if(redFlag && mRedFlagMarker == null){
                     mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag"));
                     mRedFlagMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
-                    mRedFlagMarker.setVisible(false);
                 }
 
-                if(leader){
+                if(mCircle != null){
                     if(mTeam.equals("blue")){
-                        if(!blueFlag){
-                            showButton();
-                        } else if(!redFlag){
-                            writeWaitingText(true);
-                        } else{
-                            changeActivity();
-                        }
+                        mBlueFlagMarker.setVisible(true);
+                        mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
                     } else{
-                        if(!redFlag){
-                            showButton();
-                        } else if(!blueFlag){
-                            writeWaitingText(true);
-                        } else{
-                            changeActivity();
-                        }
-                    }
-
-                } else{
-                    if(!blueFlag || !redFlag){
-                        writeWaitingText(mTeam.equals("blue") ? blueFlag : redFlag);
-                    }
-                    else {
-                        changeActivity();
+                        mRedFlagMarker.setVisible(true);
+                        mBlueFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
                     }
                 }
             }
@@ -220,67 +198,52 @@ public class PlaceFlagActivity extends AppCompatActivity
                 for(DataSnapshot child : dataSnapshot.getChildren()){
                     String name = child.getKey();
                     //if(!name.equals(mPlayerName)){
-                        Player player = child.getValue(Player.class);
-                        Marker m = mPlayerMarkers.get(name);
-                        LatLng playerLoc = player.getLatLng();
-                        if(m != null) {
-                            m.setPosition(playerLoc);
-                            //MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
-                            if(name.equals(mPlayerName)){
-                                mCircle.setCenter(playerLoc);
-                                mInnerCircle.setCenter(playerLoc);
-                                
-                            }
-                            if(!player.team.equals(mTeam)) {
-                                m.setVisible(Area.withinCircle(playerLoc, mCircle));
-                            }
-                        } else{
-                            if(name.equals(mPlayerName)){
-                                mCircle = mMap.addCircle(new CircleOptions()
-                                        .center(playerLoc)
-                                        .radius(OUTER_CIRCLE_RADIUS)
-                                        .fillColor(Color.argb(64, 255, 255, 255))
-                                        .strokeColor(Color.argb(192, 255, 255, 255)));
-                                mCircle.setZIndex(1);
+                    Player player = child.getValue(Player.class);
+                    Marker m = mPlayerMarkers.get(name);
+                    LatLng playerLoc = player.getLatLng();
+                    if(m != null) {
+                        m.setPosition(playerLoc);
+                        //MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
+                        if(name.equals(mPlayerName)){
+                            mCircle.setCenter(playerLoc);
+                            mInnerCircle.setCenter(playerLoc);
 
-                                mInnerCircle = mMap.addCircle(new CircleOptions()
-                                        .center(playerLoc)
-                                        .radius(INNER_CIRCLE_RADIUS)
-                                        .fillColor(Color.argb(32, 255, 255, 0))
-                                        .strokeColor(Color.argb(192, 255, 255, 0)));
-                                mInnerCircle.setZIndex(1);
-                            }
-
-
-                            m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name));
-
-                            if(!player.team.equals(mTeam) && mCircle != null) {
-                                m.setVisible(Area.withinCircle(playerLoc, mCircle));
-                            } else{
-                                m.setVisible(true);
-                            }
-                            if(mCircle != null && mBlueFlagMarker != null){
-                                if(mTeam.equals("blue")){
-                                    mBlueFlagMarker.setVisible(true);
-                                } else{
-                                    mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
-                                }
-                            } else if(mCircle != null && mRedFlagMarker != null){
-                                if(mTeam.equals("red")){
-                                    mRedFlagMarker.setVisible(true);
-                                } else{
-                                    mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
-                                }
-
-                            }
-
-                            if(player.team.equals("blue")) {
-                                m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                            } else{
-                                m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                            }
-                            mPlayerMarkers.put(name,m);
                         }
+                        if(!player.team.equals(mTeam)) {
+                            m.setVisible(Area.withinCircle(playerLoc, mCircle));
+                        }
+                    } else{
+                        if(name.equals(mPlayerName)){
+                            mCircle = mMap.addCircle(new CircleOptions()
+                                    .center(playerLoc)
+                                    .radius(OUTER_CIRCLE_RADIUS)
+                                    .fillColor(Color.argb(64, 255, 255, 255))
+                                    .strokeColor(Color.argb(192, 255, 255, 255)));
+                            mCircle.setZIndex(1);
+
+                            mInnerCircle = mMap.addCircle(new CircleOptions()
+                                    .center(playerLoc)
+                                    .radius(INNER_CIRCLE_RADIUS)
+                                    .fillColor(Color.argb(32, 255, 255, 0))
+                                    .strokeColor(Color.argb(192, 255, 255, 0)));
+                            mInnerCircle.setZIndex(1);
+                        }
+
+
+                        m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name));
+
+                        if(!player.team.equals(mTeam) && mCircle != null) {
+                            m.setVisible(Area.withinCircle(playerLoc, mCircle));
+                        } else{
+                            m.setVisible(true);
+                        }
+                        if(player.team.equals("blue")) {
+                            m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        } else{
+                            m.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                        }
+                        mPlayerMarkers.put(name,m);
+                    }
                     //}
                 }
             }
@@ -289,75 +252,6 @@ public class PlaceFlagActivity extends AppCompatActivity
             public void onCancelled(DatabaseError firebaseError) {
             }
         });
-    }
-
-    private void changeActivity() {
-        Toast.makeText(getApplicationContext(), "Starting game", Toast.LENGTH_SHORT).show();
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                Intent intent = new Intent(PlaceFlagActivity.this, GameActivity.class);
-                intent.putExtra("game",mGameName);
-                intent.putExtra("player",mPlayerName);
-                intent.putExtra("team",mTeam);
-                startActivity(intent);
-            }
-        }, 2000);
-    }
-
-    private void showButton() {
-        Button button = new Button(this);
-        button.setText("Place Flag at Current Location");
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                pressPlaceFlag(view);
-            }
-        });
-        LinearLayout bottomTextView = (LinearLayout)findViewById(R.id.bottomText);
-        bottomTextView.removeAllViews();
-        bottomTextView.addView(button);
-    }
-
-    private void writeWaitingText(boolean flag) {
-        TextView view = new TextView(this);
-        String waitingText = "";
-        if(flag){
-            waitingText = "Waiting for other team...";
-        } else{
-            waitingText = "Waiting for team leader to place flag...";
-        }
-        view.setText(waitingText);
-
-        LinearLayout bottomTextView = (LinearLayout) findViewById(R.id.bottomText);
-        bottomTextView.removeAllViews();
-        bottomTextView.addView(view);
-    }
-
-    private void pressPlaceFlag(View view) {
-        LatLng min;
-        LatLng max;
-        if(mTeam.equals("blue")){
-            min = mBlueMin;
-            max = mBlueMax;
-        } else{
-            min = mRedMin;
-            max = mRedMax;
-        }
-        double lat = mCurrentLocation.getLatitude();
-        double lng = mCurrentLocation.getLongitude();
-        if(Area.withinArea(new LatLng(lat,lng),min,max)){
-            if(mTeam.equals("blue")){
-                mDatabase.child("areas").child(mGameName).child("blueFlagLat").setValue(lat);
-                mDatabase.child("areas").child(mGameName).child("blueFlagLong").setValue(lng);
-                mDatabase.child("areas").child(mGameName).child("blueFlag").setValue(true);
-            } else{
-                mDatabase.child("areas").child(mGameName).child("redFlagLat").setValue(lat);
-                mDatabase.child("areas").child(mGameName).child("redFlagLong").setValue(lng);
-                mDatabase.child("areas").child(mGameName).child("redFlag").setValue(true);
-            }
-        } else{
-            Toast.makeText(getApplicationContext(), "Flag is not in your team's territory!", Toast.LENGTH_SHORT).show();
-        }
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -428,7 +322,7 @@ public class PlaceFlagActivity extends AppCompatActivity
                 try {
                     // Show the dialog by calling startResolutionForResult(), and check the result
                     // in onActivityResult().
-                    status.startResolutionForResult(PlaceFlagActivity.this, REQUEST_CHECK_SETTINGS);
+                    status.startResolutionForResult(GameActivity.this, REQUEST_CHECK_SETTINGS);
                 } catch (IntentSender.SendIntentException e) {
                     Log.i(TAG, "PendingIntent unable to execute request.");
                 }

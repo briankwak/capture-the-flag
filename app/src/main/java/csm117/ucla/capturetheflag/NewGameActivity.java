@@ -324,18 +324,31 @@ public class NewGameActivity extends AppCompatActivity
     }
 
     private List<LatLng> createRectangle(LatLng center, double halfWidth, double halfHeight, boolean bottom) {
+//        if(bottom) {
+//            return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
+//                    new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
+//                    new LatLng(center.latitude, center.longitude + halfWidth),
+//                    new LatLng(center.latitude, center.longitude - halfWidth),
+//                    new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
+//        } else{
+//            return Arrays.asList(new LatLng(center.latitude, center.longitude - halfWidth),
+//                    new LatLng(center.latitude, center.longitude + halfWidth),
+//                    new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
+//                    new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
+//                    new LatLng(center.latitude, center.longitude - halfWidth));
+//        }
         if(bottom) {
             return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
-                    new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
-                    new LatLng(center.latitude, center.longitude + halfWidth),
-                    new LatLng(center.latitude, center.longitude - halfWidth),
+                    new LatLng(center.latitude - halfHeight, center.longitude),
+                    new LatLng(center.latitude + halfHeight, center.longitude),
+                    new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
                     new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
         } else{
-            return Arrays.asList(new LatLng(center.latitude, center.longitude - halfWidth),
-                    new LatLng(center.latitude, center.longitude + halfWidth),
+            return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude),
+                    new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
                     new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
-                    new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
-                    new LatLng(center.latitude, center.longitude - halfWidth));
+                    new LatLng(center.latitude + halfHeight, center.longitude),
+                    new LatLng(center.latitude - halfHeight, center.longitude));
         }
     }
 
