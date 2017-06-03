@@ -67,6 +67,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import static android.R.attr.max;
+import static android.R.attr.x;
+
 public class GameActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<LocationSettingsResult>,
@@ -96,6 +99,7 @@ public class GameActivity extends AppCompatActivity
     private String mTeam;
     private DatabaseReference mDatabase;
     private boolean mDead;
+    private Player mPlayer;
 
     private LatLng mRedMin;
     private LatLng mRedMax;
@@ -223,6 +227,7 @@ public class GameActivity extends AppCompatActivity
                         m.setPosition(playerLoc);
                         //MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
                         if(name.equals(mPlayerName)){
+                            mPlayer = player;
                             mCircle.setCenter(playerLoc);
                             mInnerCircle.setCenter(playerLoc);
                             mDead = player.dead;
@@ -572,10 +577,9 @@ public class GameActivity extends AppCompatActivity
             Toast.makeText(getApplicationContext(), name, Toast.LENGTH_SHORT).show();
             if (name.equals(mRedFlagMarker.getTitle())){
                 // Flag is red
-                if (mTeam.equals("red")) {
 
                 }
-            }
+
 
             else{ //Flag is Blue
 
@@ -588,7 +592,26 @@ public class GameActivity extends AppCompatActivity
     }
 
     private boolean withinTerritory() {
-        return true;
+        double lat = mCurrentLocation.getLatitude();
+        double lng = mCurrentLocation.getLongitude();
+        LatLng min;
+        LatLng max;
+        if (mTeam.equals("blue")) {
+            min = mBlueMin;
+            max = mBlueMax;
+        } else {
+            min = mRedMin;
+            max = mRedMax;
+        }
+        if (Area.withinArea(new LatLng(lat, lng), min, max)) {
+            Toast.makeText(getApplicationContext(), "Player within territory! RIP ENEMY :D", Toast.LENGTH_SHORT).show();
+            return true;
+
+        } else {
+            Toast.makeText(getApplicationContext(), "Player not in your territory D: RUN BRUH", Toast.LENGTH_SHORT).show();
+            return false;
+
+        }
     }
 
 
