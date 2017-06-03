@@ -238,8 +238,22 @@ public class GameActivity extends AppCompatActivity
                             m.setVisible(Area.withinCircle(playerLoc, mCircle));
                         } else{
                             m.setVisible(true);
+                        } if(mCircle != null && mBlueFlagMarker != null){
+                            if(mTeam.equals("blue")){
+                                mBlueFlagMarker.setVisible(true);
+                            } else{
+                                mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
+                            }
                         }
-                    } else{
+                        if(mCircle != null && mRedFlagMarker != null) {
+                            if (mTeam.equals("red")) {
+                                mRedFlagMarker.setVisible(true);
+                            } else {
+                                mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag, mCircle));
+                            }
+                        }
+
+                        } else{
                         if(name.equals(mPlayerName)){
                             mCircle = mMap.addCircle(new CircleOptions()
                                     .center(playerLoc)
