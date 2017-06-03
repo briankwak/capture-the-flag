@@ -225,6 +225,7 @@ public class NewGameActivity extends AppCompatActivity
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(TAG, "Connected to GoogleApiClient");
+        checkLocationSettings();
         if (mCurrentLocation == null) {
 
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -236,7 +237,6 @@ public class NewGameActivity extends AppCompatActivity
                     MAP_ZOOM));
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         }
-        checkLocationSettings();
     }
 
     protected void startLocationUpdates() {

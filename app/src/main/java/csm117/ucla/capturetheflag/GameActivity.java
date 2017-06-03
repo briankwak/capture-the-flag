@@ -103,6 +103,8 @@ public class GameActivity extends AppCompatActivity
     private LatLng mBlueMax;
     private LatLng mRedFlag;
     private LatLng mBlueFlag;
+    private LatLng mRedFlagStart;
+    private LatLng mBlueFlagStart;
 
     private Marker mRedFlagMarker;
     private Marker mBlueFlagMarker;
@@ -171,8 +173,9 @@ public class GameActivity extends AppCompatActivity
                 boolean redFlag = area.redFlag;
                 boolean blueFlag = area.blueFlag;
                 mRedFlag = area.redFlag();
+                mRedFlagStart = mRedFlag;
                 mBlueFlag = area.blueFlag();
-
+                mBlueFlagStart = mBlueFlag;
                 if(blueFlag && mBlueFlagMarker == null){
                     mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag").anchor(0.0f,1.0f));
                     mBlueFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueflag));
@@ -227,6 +230,10 @@ public class GameActivity extends AppCompatActivity
                         }
                         if(player.dead){
                             m.setVisible(false);
+                            if(player.hasFlag){
+
+
+                            }
                         } else if(!player.team.equals(mTeam)) {
                             m.setVisible(Area.withinCircle(playerLoc, mCircle));
                         } else{
@@ -413,6 +420,7 @@ public class GameActivity extends AppCompatActivity
 
     @Override
     public void onConnected(Bundle connectionHint) {
+        checkLocationSettings();
         Log.i(TAG, "Connected to GoogleApiClient");
         if (mCurrentLocation == null) {
 
@@ -425,7 +433,7 @@ public class GameActivity extends AppCompatActivity
                     MAP_ZOOM));
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         }
-        checkLocationSettings();
+
     }
 
     protected void startLocationUpdates() {
@@ -546,8 +554,20 @@ public class GameActivity extends AppCompatActivity
             Toast.makeText(getApplicationContext(), "blah blah blah", Toast.LENGTH_SHORT);
             mDatabase.child("players").child(mGameName).child(name).child("dead").setValue(true);
         } else{
-            // what happens when you take the flag?????
-            // write code here
+            // When flag is taken...
+            Toast.makeText(getApplicationContext(), name, Toast.LENGTH_SHORT).show();
+            if (name.equals(mRedFlagMarker.getTitle())){
+                // Flag is red
+                if (mTeam.equals("red")) {
+
+                }
+            }
+
+            else{ //Flag is Blue
+
+            }
+
+
 
         }
         return true;
