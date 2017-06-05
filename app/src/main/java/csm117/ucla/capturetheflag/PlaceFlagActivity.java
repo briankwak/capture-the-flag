@@ -138,6 +138,9 @@ public class PlaceFlagActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_flag);
 
@@ -300,6 +303,8 @@ public class PlaceFlagActivity extends AppCompatActivity
             public void onCancelled(DatabaseError firebaseError) {
             }
         });
+
+
     }
 
     private void changeActivity() {
@@ -496,6 +501,18 @@ public class PlaceFlagActivity extends AppCompatActivity
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()),
                     MAP_ZOOM));
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+
+
+            /*TODO: FOR TESTING PURPOSES ONLY; REMOVE WHEN DONE
+
+            mDatabase.child("areas").child(mGameName).child("blueFlagLat").setValue(mCurrentLocation.getLatitude());
+            mDatabase.child("areas").child(mGameName).child("blueFlagLong").setValue(mCurrentLocation.getLongitude());
+            mDatabase.child("areas").child(mGameName).child("blueFlag").setValue(true);
+            mDatabase.child("areas").child(mGameName).child("redFlagLat").setValue(mCurrentLocation.getLatitude()-.0002);
+            mDatabase.child("areas").child(mGameName).child("redFlagLong").setValue(mCurrentLocation.getLongitude());
+            mDatabase.child("areas").child(mGameName).child("redFlag").setValue(true);
+
+             */
         }
         checkLocationSettings();
     }

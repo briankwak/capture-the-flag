@@ -170,23 +170,21 @@ public class GameActivity extends AppCompatActivity
 
         final LinearLayout bottomTextView = (LinearLayout)findViewById(R.id.bottomText);
 
-        mDatabase.child("areas").child(mGameName).addValueEventListener(new ValueEventListener() {
+        mDatabase.child("areas").child(mGameName).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Area area = dataSnapshot.getValue(Area.class);
                 boolean redFlag = area.redFlag;
                 boolean blueFlag = area.blueFlag;
                 mRedFlag = area.redFlag();
-                mRedFlagStart = mRedFlag;
                 mBlueFlag = area.blueFlag();
-                mBlueFlagStart = mBlueFlag;
                 if(blueFlag && mBlueFlagMarker == null){
-                    mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag").anchor(0.0f,1.0f));
+                    mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag").anchor(3.0f/42.0f,1.0f));
                     mBlueFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueflag));
                     mBlueFlagMarker.setVisible(false);
                 }
                 if(redFlag && mRedFlagMarker == null){
-                    mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag").anchor(0.0f, 1.0f));
+                    mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag").anchor(3.0f/42.0f, 1.0f));
                     mRedFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.redflag));
                     mRedFlagMarker.setVisible(false);
                 }
@@ -217,48 +215,15 @@ public class GameActivity extends AppCompatActivity
         mDatabase.child("players").child(mGameName).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean blueFlagVisible = mTeam.equals("blue");
+                boolean redFlagVisible = mTeam.equals("red");
                 for(DataSnapshot child : dataSnapshot.getChildren()){
+
                     String name = child.getKey();
-                    //if(!name.equals(mPlayerName)){
                     Player player = child.getValue(Player.class);
                     Marker m = mPlayerMarkers.get(name);
                     LatLng playerLoc = player.getLatLng();
-                    if(m != null) {
-                        m.setPosition(playerLoc);
-                        //MarkerAnimation.animateMarkerToICS(m,playerLoc,mInterpolator);
-                        if(name.equals(mPlayerName)){
-                            mPlayer = player;
-                            mCircle.setCenter(playerLoc);
-                            mInnerCircle.setCenter(playerLoc);
-                            mDead = player.dead;
-
-                        }
-                        if(player.dead){
-                            m.setVisible(false);
-                            if(player.hasFlag){
-
-
-                            }
-                        } else if(!player.team.equals(mTeam)) {
-                            m.setVisible(Area.withinCircle(playerLoc, mCircle));
-                        } else{
-                            m.setVisible(true);
-                        } if(mCircle != null && mBlueFlagMarker != null){
-                            if(mTeam.equals("blue")){
-                                mBlueFlagMarker.setVisible(true);
-                            } else{
-                                mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
-                            }
-                        }
-                        if(mCircle != null && mRedFlagMarker != null) {
-                            if (mTeam.equals("red")) {
-                                mRedFlagMarker.setVisible(true);
-                            } else {
-                                mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag, mCircle));
-                            }
-                        }
-
-                        } else{
+                    if(m == null) {
                         if(name.equals(mPlayerName)){
                             mCircle = mMap.addCircle(new CircleOptions()
                                     .center(playerLoc)
@@ -277,33 +242,7 @@ public class GameActivity extends AppCompatActivity
                             mDead = player.dead;
                         }
 
-
                         m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name).anchor(0.5f,0.5f));
-
-                        if(player.dead){
-                            m.setVisible(false);
-                        } else if((!player.team.equals(mTeam) && mCircle != null)) {
-                            m.setVisible(Area.withinCircle(playerLoc, mCircle));
-                        } else{
-                            m.setVisible(true);
-                        }
-
-
-                        if(mCircle != null && mBlueFlagMarker != null){
-                            if(mTeam.equals("blue")){
-                                mBlueFlagMarker.setVisible(true);
-                            } else{
-                                mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
-                            }
-                        }
-                        if(mCircle != null && mRedFlagMarker != null){
-                            if(mTeam.equals("red")){
-                                mRedFlagMarker.setVisible(true);
-                            } else{
-                                mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
-                            }
-
-                        }
 
                         if(player.team.equals("blue")) {
                             m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueplayermarker));
@@ -312,7 +251,60 @@ public class GameActivity extends AppCompatActivity
                         }
                         mPlayerMarkers.put(name,m);
                     }
-                    //}
+
+                    m.setPosition(playerLoc);
+                    if(name.equals(mPlayerName)){
+                        mPlayer = player;
+                        mCircle.setCenter(playerLoc);
+                        mInnerCircle.setCenter(playerLoc);
+                        mDead = player.dead;
+                        if(player.hasFlag && withinTerritory()){
+                            mDatabase.child("games").child(mGameName).setValue("ended");
+                        }
+                    }
+
+                    if(player.dead){
+                        m.setVisible(false);
+                    } else if(!player.team.equals(mTeam)) {
+                        m.setVisible(Area.withinCircle(playerLoc, mCircle));
+                    } else{
+                        m.setVisible(true);
+                    }
+                    
+                    if(player.hasFlag){
+                        if(player.team.equals(mTeam)){
+                            if(mTeam.equals("blue")) {
+                                mRedFlagMarker.setPosition(playerLoc);
+                                redFlagVisible = true;
+                            } else{
+                                mBlueFlagMarker.setPosition(playerLoc);
+                                blueFlagVisible = true;
+                            }
+                        } else{
+                            if(mTeam.equals("blue")) {
+                                mRedFlagMarker.setPosition(playerLoc);
+                                redFlagVisible = Area.withinCircle(playerLoc,mCircle);
+                            } else{
+                                mBlueFlagMarker.setPosition(playerLoc);
+                                blueFlagVisible = Area.withinCircle(playerLoc,mCircle);
+                            }
+                        }
+                    }
+                }
+                if(mCircle != null && mBlueFlagMarker != null){
+                    if(mTeam.equals("blue")){
+                        mBlueFlagMarker.setVisible(blueFlagVisible);
+                    } else{
+                        mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle) || blueFlagVisible);
+                    }
+                }
+                if(mCircle != null && mRedFlagMarker != null){
+                    if(mTeam.equals("red")){
+                        mRedFlagMarker.setVisible(redFlagVisible);
+                    } else{
+                        mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle) || redFlagVisible);
+                    }
+
                 }
             }
 
@@ -322,6 +314,25 @@ public class GameActivity extends AppCompatActivity
         });
 
 
+        mDatabase.child("games").child(mGameName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String str = (String)dataSnapshot.getValue();
+                if(str.equals("ended")){
+                    endGame();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+            }
+
+        });
+
+    }
+
+    private void endGame() {
+        Toast.makeText(getApplicationContext(),"Game over!",Toast.LENGTH_LONG).show();
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -569,26 +580,30 @@ public class GameActivity extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker){
         String name = marker.getTitle();
-        if(mPlayerMarkers.containsKey(name) && !mMyTeam.contains(name) && !mDead && withinTerritory()) {
-            Toast.makeText(getApplicationContext(), "blah blah blah", Toast.LENGTH_SHORT);
-            mDatabase.child("players").child(mGameName).child(name).child("dead").setValue(true);
+        if(mPlayerMarkers.containsKey(name)) {
+            if(!mMyTeam.contains(name) && !mDead && withinTerritory()) {
+                Toast.makeText(getApplicationContext(), "blah blah blah", Toast.LENGTH_SHORT);
+                killPlayer(name);
+            }
         } else{
             // When flag is taken...
-            Toast.makeText(getApplicationContext(), name, Toast.LENGTH_SHORT).show();
-            if (name.equals(mRedFlagMarker.getTitle())){
-                // Flag is red
-
-                }
-
-
-            else{ //Flag is Blue
-
+            if ((name.equals(mRedFlagMarker.getTitle()) && mTeam.equals("blue")) ||
+                    (name.equals(mBlueFlagMarker.getTitle()) && mTeam.equals("red"))){
+                //Toast.makeText(getApplicationContext(), name, Toast.LENGTH_SHORT).show();
+                takeFlag();
             }
-
 
 
         }
         return true;
+    }
+
+    private void takeFlag() {
+        mDatabase.child("players").child(mGameName).child(mPlayerName).child("hasFlag").setValue(true);
+    }
+
+    private void killPlayer(String name) {
+        mDatabase.child("players").child(mGameName).child(name).child("dead").setValue(true);
     }
 
     private boolean withinTerritory() {
@@ -603,16 +618,6 @@ public class GameActivity extends AppCompatActivity
             min = mRedMin;
             max = mRedMax;
         }
-        if (Area.withinArea(new LatLng(lat, lng), min, max)) {
-            Toast.makeText(getApplicationContext(), "Player within territory! RIP ENEMY :D", Toast.LENGTH_SHORT).show();
-            return true;
-
-        } else {
-            Toast.makeText(getApplicationContext(), "Player not in your territory D: RUN BRUH", Toast.LENGTH_SHORT).show();
-            return false;
-
-        }
+        return Area.withinArea(new LatLng(lat, lng), min, max);
     }
-
-
 }

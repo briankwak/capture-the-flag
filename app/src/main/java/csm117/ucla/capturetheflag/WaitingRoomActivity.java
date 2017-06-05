@@ -111,8 +111,8 @@ public class WaitingRoomActivity extends Activity {
         mDatabase.child("games").child(mGameName).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                if((boolean)dataSnapshot.getValue()){
+                String str = (String)dataSnapshot.getValue();
+                if(str.equals("started")){
                     Toast.makeText(getApplicationContext(), "Starting game", Toast.LENGTH_SHORT).show();
                     Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
@@ -163,7 +163,7 @@ public class WaitingRoomActivity extends Activity {
 
     public void pressStart(View view) {
         sortPlayers();
-        mDatabase.child("games").child(mGameName).setValue(true);
+        mDatabase.child("games").child(mGameName).setValue("started");
     }
 
     public void startGame(){

@@ -380,7 +380,7 @@ public class NewGameActivity extends AppCompatActivity
                     }
 
                     Map<String, Object> childUpdates = new HashMap<>();
-                    childUpdates.put("/games/" + gameName, false);
+                    childUpdates.put("/games/" + gameName, "waiting");
                     childUpdates.put("/areas/" + gameName, area.toMap());
                     childUpdates.put("/players/" + gameName + "/" + playerName, player.toMap());
 
