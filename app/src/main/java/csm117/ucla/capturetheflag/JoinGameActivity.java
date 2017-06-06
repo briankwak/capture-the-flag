@@ -44,7 +44,8 @@ public class JoinGameActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot.exists()){
-                        if((boolean)dataSnapshot.getValue()){
+                        String str = (String)dataSnapshot.getValue();
+                        if(str.equals("started")){
                             Toast.makeText(getApplicationContext(), "Game already in progress", Toast.LENGTH_SHORT).show();
                             return;
                         }
