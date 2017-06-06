@@ -28,6 +28,7 @@ public class EndActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Going back to main menu", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this,MainActivity.class);
         startActivity(intent);
+        finish();
 
     }
 }

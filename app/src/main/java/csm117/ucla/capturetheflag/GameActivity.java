@@ -343,16 +343,13 @@ public class GameActivity extends AppCompatActivity
                     return;
                 }
                 String str = (String)dataSnapshot.getValue();
-                if(str.equals("blue") && mTeam.equals("blue")){
-                    mWin = true;
+                if(str.equals("red") || str.equals("blue")) {
+                    if (str.equals(mTeam)) {
+                        mWin = true;
+                    }
                     endGame();
                 }
 
-                else if (str.equals("red") && mTeam.equals("red")) {// read team wins
-                    mWin = true;
-                    endGame();
-
-                }
             }
 
             @Override
