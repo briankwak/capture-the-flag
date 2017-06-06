@@ -23,6 +23,7 @@ import android.content.IntentSender;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -99,7 +100,6 @@ public class GameActivity extends AppCompatActivity
     private String mTeam;
     private DatabaseReference mDatabase;
     private boolean mDead;
-    private Player mPlayer;
 
     private LatLng mRedMin;
     private LatLng mRedMax;
@@ -112,6 +112,7 @@ public class GameActivity extends AppCompatActivity
 
     private Marker mRedFlagMarker;
     private Marker mBlueFlagMarker;
+    private boolean mWin = false;
 
     private HashMap<String,Marker> mPlayerMarkers;
 
@@ -259,12 +260,11 @@ public class GameActivity extends AppCompatActivity
 
                     m.setPosition(playerLoc);
                     if(name.equals(mPlayerName)){
-                        mPlayer = player;
                         mCircle.setCenter(playerLoc);
                         mInnerCircle.setCenter(playerLoc);
                         mDead = player.dead;
                         if(player.hasFlag && withinTerritory()){
-                            mDatabase.child("games").child(mGameName).setValue("ended");
+                            mDatabase.child("games").child(mGameName).setValue(player.team);
                         }
                     }
 
@@ -343,8 +343,15 @@ public class GameActivity extends AppCompatActivity
                     return;
                 }
                 String str = (String)dataSnapshot.getValue();
-                if(str.equals("ended")){
+                if(str.equals("blue") && mTeam.equals("blue")){
+                    mWin = true;
                     endGame();
+                }
+
+                else if (str.equals("red") && mTeam.equals("red")) {// read team wins
+                    mWin = true;
+                    endGame();
+
                 }
             }
 
@@ -358,6 +365,15 @@ public class GameActivity extends AppCompatActivity
 
     private void endGame() {
         Toast.makeText(getApplicationContext(),"Game over!",Toast.LENGTH_LONG).show();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                Intent intent = new Intent(GameActivity.this, EndActivity.class);
+                intent.putExtra("win",mWin);
+                intent.putExtra("team",mTeam);
+                startActivity(intent);
+            }
+        }, 1000);
     }
 
     protected synchronized void buildGoogleApiClient() {
