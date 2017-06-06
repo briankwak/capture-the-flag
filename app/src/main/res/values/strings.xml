@@ -228,4 +228,7 @@
     ]
   }
 ]</string>
+  <string name="orientation">Orientation</string>
+  <string name="horizontal">Horizontal</string>
+  <string name="vertical">Vertical</string>
 </resources>

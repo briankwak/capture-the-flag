@@ -182,14 +182,30 @@ public class PlaceFlagActivity extends AppCompatActivity
                 mBlueFlag = area.blueFlag();
 
                 if(blueFlag && mBlueFlagMarker == null){
-                    mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag").anchor(0.0f,1.0f));
+                    mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag").anchor(3.0f/42.0f, 1.0f));
                     mBlueFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueflag));
                     mBlueFlagMarker.setVisible(false);
                 }
                 if(redFlag && mRedFlagMarker == null){
-                    mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag").anchor(0.0f,1.0f));
+                    mRedFlagMarker = mMap.addMarker(new MarkerOptions().position(mRedFlag).title("Red Flag").anchor(3.0f/42.0f, 1.0f));
                     mRedFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.redflag));
                     mRedFlagMarker.setVisible(false);
+                }
+
+                if(mCircle != null && mBlueFlagMarker != null){
+                    if(mTeam.equals("blue")){
+                        mBlueFlagMarker.setVisible(true);
+                        Toast.makeText(getApplicationContext(),"BLAH",Toast.LENGTH_SHORT).show();
+                    } else{
+                        mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
+                    }
+                }
+                if(mCircle != null && mRedFlagMarker != null){
+                    if(mTeam.equals("red")){
+                        mRedFlagMarker.setVisible(true);
+                    } else{
+                        mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
+                    }
                 }
 
                 if(leader){
@@ -312,6 +328,7 @@ public class PlaceFlagActivity extends AppCompatActivity
                             if(mCircle != null && mBlueFlagMarker != null){
                                 if(mTeam.equals("blue")){
                                     mBlueFlagMarker.setVisible(true);
+                                    Toast.makeText(getApplicationContext(),"BLAH",Toast.LENGTH_SHORT).show();
                                 } else{
                                     mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
                                 }
@@ -322,7 +339,6 @@ public class PlaceFlagActivity extends AppCompatActivity
                                 } else{
                                     mRedFlagMarker.setVisible(Area.withinCircle(mRedFlag,mCircle));
                                 }
-
                             }
 
                             if(player.team.equals("blue")) {

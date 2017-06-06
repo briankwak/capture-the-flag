@@ -26,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -93,6 +94,9 @@ public class NewGameActivity extends AppCompatActivity
     private Marker mMarker;
     private LatLngInterpolator.Linear mInterpolator;
 
+    private boolean mRectOrientation;
+    private LatLng mRectCenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,6 +113,8 @@ public class NewGameActivity extends AppCompatActivity
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         mInterpolator = new LatLngInterpolator.Linear();
+
+        mRectOrientation = true;
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -333,34 +339,39 @@ public class NewGameActivity extends AppCompatActivity
                 .fillColor(Color.argb(32, 0, 0, 255))
                 .strokeColor(Color.argb(128, 0, 0, 255))
                 .strokeWidth(10));
+
+        mRectCenter = latLng;
     }
 
     private List<LatLng> createRectangle(LatLng center, double halfWidth, double halfHeight, boolean bottom) {
-//        if(bottom) {
-//            return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
-//                    new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
-//                    new LatLng(center.latitude, center.longitude + halfWidth),
-//                    new LatLng(center.latitude, center.longitude - halfWidth),
-//                    new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
-//        } else{
-//            return Arrays.asList(new LatLng(center.latitude, center.longitude - halfWidth),
-//                    new LatLng(center.latitude, center.longitude + halfWidth),
-//                    new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
-//                    new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
-//                    new LatLng(center.latitude, center.longitude - halfWidth));
-//        }
-        if(bottom) {
-            return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
-                    new LatLng(center.latitude - halfHeight, center.longitude),
-                    new LatLng(center.latitude + halfHeight, center.longitude),
-                    new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
-                    new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
-        } else{
-            return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude),
-                    new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
-                    new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
-                    new LatLng(center.latitude + halfHeight, center.longitude),
-                    new LatLng(center.latitude - halfHeight, center.longitude));
+        if(mRectOrientation) {
+            if (bottom) {
+                return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
+                        new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
+                        new LatLng(center.latitude, center.longitude + halfWidth),
+                        new LatLng(center.latitude, center.longitude - halfWidth),
+                        new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
+            } else {
+                return Arrays.asList(new LatLng(center.latitude, center.longitude - halfWidth),
+                        new LatLng(center.latitude, center.longitude + halfWidth),
+                        new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
+                        new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
+                        new LatLng(center.latitude, center.longitude - halfWidth));
+            }
+        } else {
+            if (bottom) {
+                return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude - halfWidth),
+                        new LatLng(center.latitude - halfHeight, center.longitude),
+                        new LatLng(center.latitude + halfHeight, center.longitude),
+                        new LatLng(center.latitude + halfHeight, center.longitude - halfWidth),
+                        new LatLng(center.latitude - halfHeight, center.longitude - halfWidth));
+            } else {
+                return Arrays.asList(new LatLng(center.latitude - halfHeight, center.longitude),
+                        new LatLng(center.latitude - halfHeight, center.longitude + halfWidth),
+                        new LatLng(center.latitude + halfHeight, center.longitude + halfWidth),
+                        new LatLng(center.latitude + halfHeight, center.longitude),
+                        new LatLng(center.latitude - halfHeight, center.longitude));
+            }
         }
     }
 
@@ -368,6 +379,7 @@ public class NewGameActivity extends AppCompatActivity
     public void onMapClick(LatLng latLng) {
         mRedTeamArea.setPoints(createRectangle(latLng,AREA_WIDTH,AREA_HEIGHT, true));
         mBlueTeamArea.setPoints(createRectangle(latLng,AREA_WIDTH,AREA_HEIGHT, false));
+        mRectCenter = latLng;
     }
 
     public void pressConfirm(View view){
@@ -413,6 +425,25 @@ public class NewGameActivity extends AppCompatActivity
         intent.putExtra("creator",true);
         startActivity(intent);
         finish();
+    }
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radio_horizontal:
+                if (checked)
+                    mRectOrientation = true;
+                    break;
+            case R.id.radio_vertical:
+                if (checked)
+                    mRectOrientation = false;
+                    break;
+        }
+        mRedTeamArea.setPoints(createRectangle(mRectCenter,AREA_WIDTH,AREA_HEIGHT, true));
+        mBlueTeamArea.setPoints(createRectangle(mRectCenter,AREA_WIDTH,AREA_HEIGHT, false));
     }
 }
 
