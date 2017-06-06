@@ -368,6 +368,7 @@ public class GameActivity extends AppCompatActivity
                 Intent intent = new Intent(GameActivity.this, EndActivity.class);
                 intent.putExtra("win",mWin);
                 intent.putExtra("team",mTeam);
+                intent.putExtra("game",mGameName);
                 startActivity(intent);
             }
         }, 1000);

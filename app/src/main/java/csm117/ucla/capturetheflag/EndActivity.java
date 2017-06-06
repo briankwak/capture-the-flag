@@ -7,8 +7,13 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class EndActivity extends AppCompatActivity {
     private Boolean mWin;
+    private DatabaseReference mDatabase;
+    private String mGameName;
 
 
     @Override
@@ -16,6 +21,8 @@ public class EndActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_end);
         mWin = getIntent().getExtras().getBoolean("win");
+        mGameName = getIntent().getStringExtra("game");
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         TextView winCondition = (TextView)findViewById(R.id.winCondition);
         if (mWin)
@@ -25,6 +32,7 @@ public class EndActivity extends AppCompatActivity {
 
     }
     public void pressBackToMenu(View view) {
+        mDatabase.child("players").child(mGameName).removeValue();
         Toast.makeText(getApplicationContext(), "Going back to main menu", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this,MainActivity.class);
         startActivity(intent);
