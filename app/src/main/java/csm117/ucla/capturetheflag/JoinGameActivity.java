@@ -93,5 +93,6 @@ public class JoinGameActivity extends AppCompatActivity {
         intent.putExtra("player",playerName);
         intent.putExtra("creator",false);
         startActivity(intent);
+        finish();
     }
 }

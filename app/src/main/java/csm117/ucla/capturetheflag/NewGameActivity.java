@@ -69,7 +69,7 @@ public class NewGameActivity extends AppCompatActivity
 
     protected static final String TAG = "NewGameActivity";
     protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0x49;
-    private static final float MAP_ZOOM = 15;
+    private static final float MAP_ZOOM = 17;
 
     private static final double AREA_WIDTH = 0.0025;
     private static final double AREA_HEIGHT = 0.0025;
@@ -400,6 +400,7 @@ public class NewGameActivity extends AppCompatActivity
         intent.putExtra("player",playerName);
         intent.putExtra("creator",true);
         startActivity(intent);
+        finish();
     }
 }
 

@@ -55,6 +55,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -78,7 +79,7 @@ public class GameActivity extends AppCompatActivity
 
     protected static final String TAG = "GameActivity";
     protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0x49;
-    private static final float MAP_ZOOM = 15;
+    private static final float MAP_ZOOM = 17;
     private static final double OUTER_CIRCLE_RADIUS = 100;
     private static final double INNER_CIRCLE_RADIUS = 25;
 
@@ -130,6 +131,7 @@ public class GameActivity extends AppCompatActivity
         builder.setMessage("Would you like to exit from the game and return to the home menu?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+                mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
                 startActivity(new Intent(GameActivity.this, MainActivity.class));
                 finish();
             }
@@ -216,6 +218,34 @@ public class GameActivity extends AppCompatActivity
             @Override
             public void onCancelled(DatabaseError firebaseError) {
             }
+        });
+
+        mDatabase.child("players").child(mGameName).addChildEventListener(new ChildEventListener(){
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot){
+                String name = dataSnapshot.getKey();
+                mPlayerMarkers.get(name).remove();
+                mPlayerMarkers.remove(name);
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError){}
+
         });
 
         mDatabase.child("players").child(mGameName).addValueEventListener(new ValueEventListener() {
@@ -333,6 +363,8 @@ public class GameActivity extends AppCompatActivity
             @Override
             public void onCancelled(DatabaseError firebaseError) {
             }
+
+
         });
 
 
@@ -371,6 +403,7 @@ public class GameActivity extends AppCompatActivity
                 intent.putExtra("game",mGameName);
                 intent.putExtra("player",mPlayerName);
                 startActivity(intent);
+                finish();
             }
         }, 1000);
     }
@@ -659,12 +692,5 @@ public class GameActivity extends AppCompatActivity
             max = mRedMax;
         }
         return Area.withinArea(new LatLng(lat, lng), min, max);
-    }
-
-
-    @Override
-    public void onDestroy(){
-        mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
-        super.onDestroy();
     }
 }

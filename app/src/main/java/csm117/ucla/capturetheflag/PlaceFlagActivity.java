@@ -57,6 +57,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -75,7 +76,7 @@ public class PlaceFlagActivity extends AppCompatActivity
 
     protected static final String TAG = "PlaceFlagActivity";
     protected static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 0x49;
-    private static final float MAP_ZOOM = 15;
+    private static final float MAP_ZOOM = 17;
     private static final double OUTER_CIRCLE_RADIUS = 100;
     private static final double INNER_CIRCLE_RADIUS = 25;
     private static final float ANCHOR_VALUE = 0.5f;
@@ -122,6 +123,7 @@ public class PlaceFlagActivity extends AppCompatActivity
         builder.setMessage("Would you like to quit the game?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+                mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
                 startActivity(new Intent(PlaceFlagActivity.this, MainActivity.class));
                 finish();
             }
@@ -225,6 +227,36 @@ public class PlaceFlagActivity extends AppCompatActivity
             }
         });
 
+
+
+        mDatabase.child("players").child(mGameName).addChildEventListener(new ChildEventListener(){
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot){
+                String name = dataSnapshot.getKey();
+                mPlayerMarkers.get(name).remove();
+                mPlayerMarkers.remove(name);
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError){}
+
+        });
+
         mDatabase.child("players").child(mGameName).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -321,6 +353,7 @@ public class PlaceFlagActivity extends AppCompatActivity
                 intent.putExtra("player",mPlayerName);
                 intent.putExtra("team",mTeam);
                 startActivity(intent);
+                finish();
             }
         }, 2000);
         if (mDatabase != null && activityListener!=null) {
@@ -635,14 +668,5 @@ public class PlaceFlagActivity extends AppCompatActivity
                 new LatLng(max.latitude,min.longitude),
                 min);
     }
-
-    @Override
-    public void onDestroy(){
-        mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
-        super.onDestroy();
-    }
-
-
-
 
 }

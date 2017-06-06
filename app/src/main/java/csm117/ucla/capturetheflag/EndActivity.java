@@ -41,4 +41,11 @@ public class EndActivity extends AppCompatActivity {
         finish();
 
     }
+
+    @Override
+    public void onBackPressed()
+    {
+        pressBackToMenu(null);
+
+    }
 }

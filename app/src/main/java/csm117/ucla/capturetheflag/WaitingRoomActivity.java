@@ -58,6 +58,15 @@ public class WaitingRoomActivity extends Activity {
         builder.setMessage("Would you like to quit the game?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+                mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
+
+                if(mCreator){
+
+                    mDatabase.child("areas").child(mGameName).removeValue();
+                    mDatabase.child("games").child(mGameName).removeValue();
+                    mDatabase.child("players").child(mGameName).removeValue();
+
+                }
                 goBack();
             }
         });
@@ -208,7 +217,7 @@ public class WaitingRoomActivity extends Activity {
         intent.putExtra("leader",mTeamLeader);
         intent.putExtra("team",mTeam);
         startActivity(intent);
-
+        finish();
 
     }
 
@@ -264,22 +273,6 @@ public class WaitingRoomActivity extends Activity {
             public void onCancelled(DatabaseError firebaseError) {
             }
         });
-    }
-
-
-    @Override
-    public void onDestroy(){
-        mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
-
-        if(mCreator){
-
-            mDatabase.child("areas").child(mGameName).removeValue();
-            mDatabase.child("games").child(mGameName).removeValue();
-            mDatabase.child("players").child(mGameName).removeValue();
-
-        }
-
-        super.onDestroy();
     }
 
     public void goBack(){
