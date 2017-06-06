@@ -402,7 +402,7 @@ public class PlaceFlagActivity extends AppCompatActivity
         }
         double lat = mCurrentLocation.getLatitude();
         double lng = mCurrentLocation.getLongitude();
-        //if(Area.withinArea(new LatLng(lat,lng),min,max)){
+        if(Area.withinArea(new LatLng(lat,lng),min,max)){
             if(mTeam.equals("blue")){
                 mDatabase.child("areas").child(mGameName).child("blueFlagLat").setValue(lat);
                 mDatabase.child("areas").child(mGameName).child("blueFlagLong").setValue(lng);
@@ -412,9 +412,9 @@ public class PlaceFlagActivity extends AppCompatActivity
                 mDatabase.child("areas").child(mGameName).child("redFlagLong").setValue(lng);
                 mDatabase.child("areas").child(mGameName).child("redFlag").setValue(true);
             }
-//        } else{
-//            Toast.makeText(getApplicationContext(), "Flag is not in your team's territory!", Toast.LENGTH_SHORT).show();
-//        }
+        } else{
+            Toast.makeText(getApplicationContext(), "Flag is not in your team's territory!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     protected synchronized void buildGoogleApiClient() {
