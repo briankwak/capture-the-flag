@@ -195,7 +195,6 @@ public class PlaceFlagActivity extends AppCompatActivity
                 if(mCircle != null && mBlueFlagMarker != null){
                     if(mTeam.equals("blue")){
                         mBlueFlagMarker.setVisible(true);
-                        Toast.makeText(getApplicationContext(),"BLAH",Toast.LENGTH_SHORT).show();
                     } else{
                         mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
                     }
@@ -328,7 +327,6 @@ public class PlaceFlagActivity extends AppCompatActivity
                             if(mCircle != null && mBlueFlagMarker != null){
                                 if(mTeam.equals("blue")){
                                     mBlueFlagMarker.setVisible(true);
-                                    Toast.makeText(getApplicationContext(),"BLAH",Toast.LENGTH_SHORT).show();
                                 } else{
                                     mBlueFlagMarker.setVisible(Area.withinCircle(mBlueFlag,mCircle));
                                 }

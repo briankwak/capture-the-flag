@@ -97,6 +97,9 @@ public class WaitingRoomActivity extends Activity {
         mTeamLeader = false;
         mTeam = "none";
 
+
+        mDatabase.child("players").child(mGameName).child(mPlayerName).onDisconnect().removeValue();
+
         LinearLayout gameName = (LinearLayout)findViewById(R.id.gameName);
         TextView gameNameView = new TextView(this);
         gameNameView.setText("Game Name: "+mGameName);
