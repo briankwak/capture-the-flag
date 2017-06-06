@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -95,6 +96,12 @@ public class WaitingRoomActivity extends Activity {
 
         mTeamLeader = false;
         mTeam = "none";
+
+        LinearLayout gameName = (LinearLayout)findViewById(R.id.gameName);
+        TextView gameNameView = new TextView(this);
+        gameNameView.setText("Game Name: "+mGameName);
+        gameNameView.setGravity(Gravity.CENTER_HORIZONTAL);
+        gameName.addView(gameNameView);
 
         mBlueTeamView = (LinearLayout) findViewById(R.id.blueTeam);
         mRedTeamView = (LinearLayout) findViewById(R.id.redTeam);

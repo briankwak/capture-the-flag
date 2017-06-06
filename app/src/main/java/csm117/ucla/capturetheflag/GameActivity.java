@@ -127,8 +127,8 @@ public class GameActivity extends AppCompatActivity
     {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Return from Map");
-        builder.setMessage("Would you like to exit from the game and return to the home menu?");
+        builder.setTitle("Quit Game");
+        builder.setMessage("Would you like to quit the game?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
