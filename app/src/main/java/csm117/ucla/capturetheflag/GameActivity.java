@@ -52,6 +52,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -519,6 +520,15 @@ public class GameActivity extends AppCompatActivity
 //        }
         mMap.setOnMarkerClickListener(this);
         buildRectangles();
+
+
+        boolean success = mMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                        this, R.raw.style_json));
+
+        if (!success) {
+            Log.e(TAG, "Style parsing failed.");
+        }
     }
 
     @Override
