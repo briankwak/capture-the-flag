@@ -369,6 +369,7 @@ public class GameActivity extends AppCompatActivity
                 intent.putExtra("win",mWin);
                 intent.putExtra("team",mTeam);
                 intent.putExtra("game",mGameName);
+                intent.putExtra("player",mPlayerName);
                 startActivity(intent);
             }
         }, 1000);
