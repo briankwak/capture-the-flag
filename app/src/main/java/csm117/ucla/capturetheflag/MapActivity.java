@@ -283,4 +283,5 @@ public class MapActivity extends AppCompatActivity
         super.onStop();
         mGoogleApiClient.disconnect();
     }
+
 }

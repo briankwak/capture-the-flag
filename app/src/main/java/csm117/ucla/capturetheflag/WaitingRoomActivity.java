@@ -3,9 +3,11 @@ package csm117.ucla.capturetheflag;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,6 +46,28 @@ public class WaitingRoomActivity extends Activity {
     private LinearLayout mBlueTeamView;
     private LinearLayout mRedTeamView;
     private LinearLayout mNoTeamView;
+    private boolean mCreator;
+
+
+    @Override
+    public void onBackPressed()
+    {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Quit Game");
+        builder.setMessage("Would you like to quit the game?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                goBack();
+            }
+        });
+        builder.setNegativeButton("No", null);
+
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +76,13 @@ public class WaitingRoomActivity extends Activity {
 
         mGameName = getIntent().getStringExtra("game");
         mPlayerName = getIntent().getStringExtra("player");
-        boolean creator = getIntent().getExtras().getBoolean("creator");
+        mCreator = getIntent().getExtras().getBoolean("creator");
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        Intent service = new Intent(this,MyService.class);
+        service.putExtra("game",mGameName);
+        service.putExtra("player",mPlayerName);
+        startService(service);
 
         mTeamLeader = false;
         mTeam = "none";
@@ -61,7 +90,7 @@ public class WaitingRoomActivity extends Activity {
         mBlueTeamView = (LinearLayout) findViewById(R.id.blueTeam);
         mRedTeamView = (LinearLayout) findViewById(R.id.redTeam);
         mNoTeamView = (LinearLayout) findViewById(R.id.noTeam);
-        if (creator) {
+        if (mCreator) {
             Button button = new Button(this);
             button.setText("Start Game");
             button.setOnClickListener(new View.OnClickListener() {
@@ -111,6 +140,12 @@ public class WaitingRoomActivity extends Activity {
         mDatabase.child("games").child(mGameName).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    if(!mCreator){
+                        goBack();
+                    }
+                    return;
+                }
                 String str = (String)dataSnapshot.getValue();
                 if(str.equals("started")){
                     Toast.makeText(getApplicationContext(), "Starting game", Toast.LENGTH_SHORT).show();
@@ -230,4 +265,27 @@ public class WaitingRoomActivity extends Activity {
             }
         });
     }
+
+
+    @Override
+    public void onDestroy(){
+        mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
+
+        if(mCreator){
+
+            mDatabase.child("areas").child(mGameName).removeValue();
+            mDatabase.child("games").child(mGameName).removeValue();
+            mDatabase.child("players").child(mGameName).removeValue();
+
+        }
+
+        super.onDestroy();
+    }
+
+    public void goBack(){
+        startActivity(new Intent(WaitingRoomActivity.this, MainActivity.class));
+        finish();
+    }
+
+
 }

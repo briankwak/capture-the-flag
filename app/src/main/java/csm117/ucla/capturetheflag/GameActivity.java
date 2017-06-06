@@ -173,6 +173,9 @@ public class GameActivity extends AppCompatActivity
         mDatabase.child("areas").child(mGameName).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    return;
+                }
                 Area area = dataSnapshot.getValue(Area.class);
                 boolean redFlag = area.redFlag;
                 boolean blueFlag = area.blueFlag;
@@ -268,13 +271,13 @@ public class GameActivity extends AppCompatActivity
                     if(player.dead){
                         m.setVisible(false);
                         if (player.hasFlag) {
-                                if(mTeam.equals("blue")) {
-                                    mRedFlagMarker.setPosition(mRedFlag);
-                                } else{
-                                    mBlueFlagMarker.setPosition(mBlueFlag);
-                                }
+                            if(mTeam.equals("blue")) {
+                                mRedFlagMarker.setPosition(mRedFlag);
+                            } else{
+                                mBlueFlagMarker.setPosition(mBlueFlag);
+                            }
 
-                            
+
                             player.hasFlag = false;
                             mDatabase.child("players").child(mGameName).child(name).child("hasFlag").setValue(false);
 
@@ -287,7 +290,7 @@ public class GameActivity extends AppCompatActivity
                     } else{
                         m.setVisible(true);
                     }
-                    
+
                     if(player.hasFlag){
                         if(player.team.equals(mTeam)){ // if on your team
                             if(player.team.equals("blue")) {
@@ -336,6 +339,9 @@ public class GameActivity extends AppCompatActivity
         mDatabase.child("games").child(mGameName).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    return;
+                }
                 String str = (String)dataSnapshot.getValue();
                 if(str.equals("ended")){
                     endGame();
@@ -638,5 +644,12 @@ public class GameActivity extends AppCompatActivity
             max = mRedMax;
         }
         return Area.withinArea(new LatLng(lat, lng), min, max);
+    }
+
+
+    @Override
+    public void onDestroy(){
+        mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
+        super.onDestroy();
     }
 }

@@ -118,11 +118,12 @@ public class PlaceFlagActivity extends AppCompatActivity
     {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Return from Map");
-        builder.setMessage("Would you like to exit from the game and return to the home menu?");
+        builder.setTitle("Quit Game");
+        builder.setMessage("Would you like to quit the game?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 startActivity(new Intent(PlaceFlagActivity.this, MainActivity.class));
+                finish();
             }
         });
         builder.setNegativeButton("No", null);
@@ -168,6 +169,9 @@ public class PlaceFlagActivity extends AppCompatActivity
         mDatabase.child("areas").child(mGameName).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    return;
+                }
                 Area area = dataSnapshot.getValue(Area.class);
                 boolean redFlag = area.redFlag;
                 boolean blueFlag = area.blueFlag;
@@ -630,6 +634,12 @@ public class PlaceFlagActivity extends AppCompatActivity
                 max,
                 new LatLng(max.latitude,min.longitude),
                 min);
+    }
+
+    @Override
+    public void onDestroy(){
+        mDatabase.child("players").child(mGameName).child(mPlayerName).removeValue();
+        super.onDestroy();
     }
 
 

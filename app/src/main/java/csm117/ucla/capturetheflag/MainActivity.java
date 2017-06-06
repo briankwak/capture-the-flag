@@ -6,8 +6,20 @@ import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +35,36 @@ public class MainActivity extends AppCompatActivity {
                 }, 10);
             }
         }
+
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabase.child("games").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot child : dataSnapshot.getChildren()){
+                    removeGame(child.getKey());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {}
+        });
+    }
+
+    private void removeGame(String temp) {
+        final String key = temp;
+        mDatabase.child("players").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    mDatabase.child("areas").child(key).removeValue();
+                    mDatabase.child("games").child(key).removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {}
+        });
     }
 
     public void pressNewGame(View view) {
