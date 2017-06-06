@@ -653,20 +653,18 @@ public class GameActivity extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker){
         String name = marker.getTitle();
-        if(mPlayerMarkers.containsKey(name)) {
-            if(!mMyTeam.contains(name) && !mDead && withinTerritory()) {
-                Toast.makeText(getApplicationContext(), "blah blah blah", Toast.LENGTH_SHORT);
-                killPlayer(name);
-            }
-        } else{
-            // When flag is taken...
-            if ((name.equals(mRedFlagMarker.getTitle()) && mTeam.equals("blue")) ||
-                    (name.equals(mBlueFlagMarker.getTitle()) && mTeam.equals("red"))){
-                //Toast.makeText(getApplicationContext(), name, Toast.LENGTH_SHORT).show();
-                takeFlag();
-            }
+        if(Area.withinCircle(mPlayerMarkers.get(name).getPosition(),mInnerCircle)) {
+            if (mPlayerMarkers.containsKey(name)) {
+                if (!mMyTeam.contains(name) && !mDead && withinTerritory()) {
+                    killPlayer(name);
+                }
+            } else { // flag is taken
+                if ((name.equals(mRedFlagMarker.getTitle()) && mTeam.equals("blue")) ||
+                        (name.equals(mBlueFlagMarker.getTitle()) && mTeam.equals("red"))) {
+                    takeFlag();
+                }
 
-
+            }
         }
         return true;
     }
