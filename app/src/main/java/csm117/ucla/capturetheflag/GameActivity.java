@@ -115,6 +115,7 @@ public class GameActivity extends AppCompatActivity
     private Marker mRedFlagMarker;
     private Marker mBlueFlagMarker;
     private boolean mWin = false;
+    private String winningTeam;
 
     private HashMap<String,Marker> mPlayerMarkers;
 
@@ -149,6 +150,7 @@ public class GameActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
@@ -380,6 +382,7 @@ public class GameActivity extends AppCompatActivity
                     if (str.equals(mTeam)) {
                         mWin = true;
                     }
+                    winningTeam = str;
                     endGame();
                 }
 
@@ -400,7 +403,7 @@ public class GameActivity extends AppCompatActivity
             public void run() {
                 Intent intent = new Intent(GameActivity.this, EndActivity.class);
                 intent.putExtra("win",mWin);
-                intent.putExtra("team",mTeam);
+                intent.putExtra("winningTeam",winningTeam);
                 intent.putExtra("game",mGameName);
                 intent.putExtra("player",mPlayerName);
                 startActivity(intent);
@@ -663,7 +666,7 @@ public class GameActivity extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker){
         String name = marker.getTitle();
-        if(Area.withinCircle(mPlayerMarkers.get(name).getPosition(),mInnerCircle)) {
+        if(Area.withinCircle(marker.getPosition(),mInnerCircle) ) {
             if (mPlayerMarkers.containsKey(name)) {
                 if (!mMyTeam.contains(name) && !mDead && withinTerritory()) {
                     killPlayer(name);
@@ -676,6 +679,10 @@ public class GameActivity extends AppCompatActivity
 
             }
         }
+        else
+            Toast.makeText(getApplicationContext(),"Marker not within range!",Toast.LENGTH_LONG).show();
+
+
         return true;
     }
 
