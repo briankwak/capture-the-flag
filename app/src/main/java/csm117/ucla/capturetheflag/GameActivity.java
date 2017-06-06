@@ -177,7 +177,9 @@ public class GameActivity extends AppCompatActivity
                 boolean redFlag = area.redFlag;
                 boolean blueFlag = area.blueFlag;
                 mRedFlag = area.redFlag();
+                mRedFlagStart = mRedFlag;
                 mBlueFlag = area.blueFlag();
+                mBlueFlagStart = mBlueFlag;
                 if(blueFlag && mBlueFlagMarker == null){
                     mBlueFlagMarker = mMap.addMarker(new MarkerOptions().position(mBlueFlag).title("Blue Flag").anchor(3.0f/42.0f,1.0f));
                     mBlueFlagMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueflag));
@@ -265,23 +267,38 @@ public class GameActivity extends AppCompatActivity
 
                     if(player.dead){
                         m.setVisible(false);
-                    } else if(!player.team.equals(mTeam)) {
+                        if (player.hasFlag) {
+                                if(mTeam.equals("blue")) {
+                                    mRedFlagMarker.setPosition(mRedFlag);
+                                } else{
+                                    mBlueFlagMarker.setPosition(mBlueFlag);
+                                }
+
+                            
+                            player.hasFlag = false;
+                            mDatabase.child("players").child(mGameName).child(name).child("hasFlag").setValue(false);
+
+
+                        }
+
+
+                    } else if(!player.team.equals(mTeam) && mCircle != null) {
                         m.setVisible(Area.withinCircle(playerLoc, mCircle));
                     } else{
                         m.setVisible(true);
                     }
                     
                     if(player.hasFlag){
-                        if(player.team.equals(mTeam)){
-                            if(mTeam.equals("blue")) {
+                        if(player.team.equals(mTeam)){ // if on your team
+                            if(player.team.equals("blue")) {
                                 mRedFlagMarker.setPosition(playerLoc);
                                 redFlagVisible = true;
                             } else{
                                 mBlueFlagMarker.setPosition(playerLoc);
                                 blueFlagVisible = true;
                             }
-                        } else{
-                            if(mTeam.equals("blue")) {
+                        } else if(mCircle != null){
+                            if(player.team.equals("blue")) { //if not on your team
                                 mRedFlagMarker.setPosition(playerLoc);
                                 redFlagVisible = Area.withinCircle(playerLoc,mCircle);
                             } else{
@@ -290,6 +307,8 @@ public class GameActivity extends AppCompatActivity
                             }
                         }
                     }
+
+
                 }
                 if(mCircle != null && mBlueFlagMarker != null){
                     if(mTeam.equals("blue")){

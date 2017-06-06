@@ -97,7 +97,7 @@ public class PlaceFlagActivity extends AppCompatActivity
     private String mPlayerName;
     private String mTeam;
     private DatabaseReference mDatabase;
-
+    private ValueEventListener activityListener;
     private LatLng mRedMin;
     private LatLng mRedMax;
     private LatLng mBlueMin;
@@ -123,7 +123,6 @@ public class PlaceFlagActivity extends AppCompatActivity
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 startActivity(new Intent(PlaceFlagActivity.this, MainActivity.class));
-                finish();
             }
         });
         builder.setNegativeButton("No", null);
@@ -267,6 +266,7 @@ public class PlaceFlagActivity extends AppCompatActivity
                                                     .title(name)
                                                     .anchor(ANCHOR_VALUE,ANCHOR_VALUE));
 
+
                             if(!player.team.equals(mTeam) && mCircle != null) {
                                 m.setVisible(Area.withinCircle(playerLoc, mCircle));
                             } else{
@@ -319,6 +319,10 @@ public class PlaceFlagActivity extends AppCompatActivity
                 startActivity(intent);
             }
         }, 2000);
+        if (mDatabase != null && activityListener!=null) {
+            mDatabase.removeEventListener(activityListener);
+        }
+
     }
 
     private void showButton() {
