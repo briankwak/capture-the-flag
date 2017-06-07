@@ -87,7 +87,7 @@ public class GameActivity extends AppCompatActivity
     private String mLastUpdateTime;
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
     private Marker mMarker;
