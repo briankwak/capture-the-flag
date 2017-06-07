@@ -27,10 +27,7 @@ import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -70,8 +67,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import static android.R.attr.max;
-import static android.R.attr.x;
+import static csm117.ucla.capturetheflag.R.id.map;
 
 public class GameActivity extends AppCompatActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
@@ -124,6 +120,7 @@ public class GameActivity extends AppCompatActivity
 
     private HashSet<String> mMyTeam;
 
+
     @Override
     public void onBackPressed()
     {
@@ -162,7 +159,7 @@ public class GameActivity extends AppCompatActivity
         mMyTeam = new HashSet<>();
 
         SupportMapFragment mapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(map);
         mapFragment.getMapAsync(this);
 
         buildGoogleApiClient();
@@ -706,6 +703,7 @@ public class GameActivity extends AppCompatActivity
 
     @Override
     public boolean onMarkerClick(Marker marker){
+
         String name = marker.getTitle();
         if(Area.withinCircle(marker.getPosition(),mInnerCircle) ) {
             if (mPlayerMarkers.containsKey(name)) {
@@ -720,9 +718,13 @@ public class GameActivity extends AppCompatActivity
                 }
 
             }
+
         }
         else
             Toast.makeText(getApplicationContext(),"Marker not within range!",Toast.LENGTH_LONG).show();
+
+
+
 
 
         return true;
