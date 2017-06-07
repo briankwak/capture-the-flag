@@ -261,9 +261,9 @@ public class WaitingRoomActivity extends Activity {
                         String name = child.getKey();
                         String leader = "";
                         if(bluePlayers == 0 && team.equals("blue")){
-                            leader = " (LEADER)";
+                            leader = " " + getResources().getString(R.string.leader);
                         } else if(redPlayers == 0 && team.equals("red")){
-                            leader = " (LEADER)";
+                            leader = " " + getResources().getString(R.string.leader);
                         }
                         if(team.equals("blue")) bluePlayers++; else redPlayers++;
                         if(name.equals(mPlayerName)){
