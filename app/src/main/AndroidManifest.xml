@@ -38,10 +38,6 @@
         <activity android:name=".GameActivity" />
         <activity android:name=".EndActivity" />
 
-        <service
-            android:name=".MyService"
-            android:enabled="true"
-            android:exported="true" />
     </application>
 
 </manifest>

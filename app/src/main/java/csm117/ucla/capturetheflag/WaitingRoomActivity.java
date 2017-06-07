@@ -77,11 +77,6 @@ public class WaitingRoomActivity extends Activity {
         mCreator = getIntent().getExtras().getBoolean("creator");
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        Intent service = new Intent(this,MyService.class);
-        service.putExtra("game",mGameName);
-        service.putExtra("player",mPlayerName);
-        startService(service);
-
         mTeamLeader = false;
         mTeam = "none";
 
