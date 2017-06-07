@@ -13,6 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 --><!-- This can go anywhere in your layout (see other demos for some examples). -->
+<!--<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#028900"
+    android:radius="10px"></ripple>-->
+
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     android:name="csm117.ucla.capturetheflag.MapActivity"
     android:id="@+id/map"
