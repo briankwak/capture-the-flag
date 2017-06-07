@@ -279,6 +279,7 @@ public class GameActivity extends AppCompatActivity
                         }
 
                         m = mMap.addMarker(new MarkerOptions().position(playerLoc).title(name).anchor(0.5f,0.5f));
+                        m.setVisible(false);
 
                         if(player.team.equals("blue")) {
                             m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.blueplayermarker));
