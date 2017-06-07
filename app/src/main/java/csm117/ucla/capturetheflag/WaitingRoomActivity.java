@@ -35,6 +35,8 @@ public class WaitingRoomActivity extends Activity {
     private LinearLayout mNoTeamView;
     private boolean mCreator;
 
+    private boolean mNoTeamChange;
+
 
     @Override
     public void onBackPressed()
@@ -158,6 +160,7 @@ public class WaitingRoomActivity extends Activity {
                 }
                 String str = (String)dataSnapshot.getValue();
                 if(str.equals("started")){
+                    mNoTeamChange = true;
                     Toast.makeText(getApplicationContext(), "Starting game", Toast.LENGTH_SHORT).show();
                     Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
@@ -191,17 +194,26 @@ public class WaitingRoomActivity extends Activity {
     }
 
     public void pressBlueTeam(View view) {
+        if(mNoTeamChange){
+            return;
+        }
         mDatabase.child("players").child(mGameName).child(mPlayerName).child("team").setValue("blue");
         mDatabase.child("players").child(mGameName).child(mPlayerName).child("time").setValue(System.currentTimeMillis());
 
     }
 
     public void pressRedTeam(View view) {
+        if(mNoTeamChange){
+            return;
+        }
         mDatabase.child("players").child(mGameName).child(mPlayerName).child("team").setValue("red");
         mDatabase.child("players").child(mGameName).child(mPlayerName).child("time").setValue(System.currentTimeMillis());
     }
 
     public void pressNoTeam(View view) {
+        if(mNoTeamChange){
+            return;
+        }
         mDatabase.child("players").child(mGameName).child(mPlayerName).child("team").setValue("none");
         mDatabase.child("players").child(mGameName).child(mPlayerName).child("time").setValue(System.currentTimeMillis());
     }
