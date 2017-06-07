@@ -1,6 +1,7 @@
 package csm117.ucla.capturetheflag;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -36,6 +37,9 @@ public class EndActivity extends AppCompatActivity {
 
         mWin = getIntent().getExtras().getBoolean("win");
         winningTeam = getIntent().getStringExtra("winningTeam");
+
+        int teamColor = (winningTeam.equals("blue") ? Color.BLUE : Color.RED);
+
         winningTeam = winningTeam.substring(0,1).toUpperCase() + winningTeam.substring(1).toLowerCase();
         mGameName = getIntent().getStringExtra("game");
         mPlayerName = getIntent().getStringExtra("player");
@@ -47,6 +51,7 @@ public class EndActivity extends AppCompatActivity {
         else
             winCondition.setText("You Lose D:");*/
         winCondition.setText(winningTeam + " Team Wins!");
+        winCondition.setTextColor(teamColor);
 
 
         mDatabase.child("players").child(mGameName).addListenerForSingleValueEvent(new ValueEventListener() {

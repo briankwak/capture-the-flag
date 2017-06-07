@@ -429,7 +429,7 @@ public class PlaceFlagActivity extends AppCompatActivity
             }
 
         } else{
-            Toast.makeText(getApplicationContext(), "Flag is not in your team's territory!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "You are not in your team's territory!", Toast.LENGTH_SHORT).show();
         }
 
     }

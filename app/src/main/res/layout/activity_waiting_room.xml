@@ -12,37 +12,48 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:id="@+id/gameName"
-        android:gravity="center">
+        android:gravity="center"
+        android:layout_marginBottom="2dp"
+        android:layout_marginTop="2dp">
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="3"
-        android:layout_weight="4">
+        android:layout_weight="4.5">
 
         <LinearLayout
+            android:id="@+id/blueTeamLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_blue"
             android:orientation="vertical"
-            android:layout_weight="1">
+            android:padding="2dp">
 
-            <Button
+            <TextView
+                android:id="@+id/blueTeamButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/blueTeamButton"
-                android:text="Blue Team"
-                android:onClick="pressBlueTeam"/>
+                android:onClick="pressBlueTeam"
+                android:clickable="true"
+                android:text="BLUE TEAM"
+                android:textColor="@color/white"
+                android:padding="8dp"
+                android:textStyle="bold"
+                android:gravity="center_horizontal"/>
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:id="@+id/blueTeam"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/rounded_white"
                 android:orientation="vertical"
-                android:layout_weight="1"
-
-                android:padding="8dp">
+                android:padding="8dp"
+                android:onClick="pressBlueTeam"
+                android:clickable="true">
 
             </LinearLayout>
 
@@ -50,50 +61,68 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:padding="2dp">
 
-            <Button
+            <TextView
+                android:id="@+id/noTeamButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/noTeamButton"
-                android:text="Random"
-                android:onClick="pressNoTeam"/>
+                android:onClick="pressNoTeam"
+                android:clickable="true"
+                android:text="RANDOM"
+                android:textColor="@color/black"
+                android:padding="8dp"
+                android:textStyle="bold"
+                android:gravity="center_horizontal"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:id="@+id/noTeam"
                 android:orientation="vertical"
                 android:layout_weight="1"
-
-                android:padding="8dp">
+                android:padding="8dp"
+                android:onClick="pressNoTeam"
+                android:clickable="true">
 
             </LinearLayout>
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/redTeamLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_red"
             android:orientation="vertical"
-            android:layout_weight="1">
-            <Button
+            android:padding="2dp">
+
+            <TextView
+                android:id="@+id/redTeamButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/redTeamButton"
-                android:text="Red Team"
-                android:onClick="pressRedTeam"/>
+                android:onClick="pressRedTeam"
+                android:clickable="true"
+                android:text="RED TEAM"
+                android:textColor="@color/white"
+                android:padding="8dp"
+                android:textStyle="bold"
+                android:gravity="center_horizontal"/>
 
             <LinearLayout
+                android:id="@+id/redTeam"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/redTeam"
-                android:orientation="vertical"
                 android:layout_weight="1"
-
-                android:padding="8dp">
+                android:background="@drawable/rounded_white"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:onClick="pressRedTeam"
+                android:clickable="true">
 
             </LinearLayout>
 
@@ -107,7 +136,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/startGame"
         android:orientation="vertical"
-        android:layout_weight="1">
+        android:gravity="bottom">
 
     </LinearLayout>
 

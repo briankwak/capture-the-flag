@@ -1,28 +1,17 @@
 package csm117.ucla.capturetheflag;
 
 import android.app.Activity;
-import android.app.ActionBar;
-import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
 import android.widget.Button;
-import android.widget.GridLayout;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.graphics.Color;
 import android.widget.TextView;
-import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -31,9 +20,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 public class WaitingRoomActivity extends Activity {
@@ -105,10 +91,15 @@ public class WaitingRoomActivity extends Activity {
         gameNameView.setText("Game Name: "+mGameName);
         gameNameView.setGravity(Gravity.CENTER_HORIZONTAL);
         gameName.addView(gameNameView);
+//
+//        LinearLayout BlueTeamLayoutView = (LinearLayout)findViewById(R.id.blueTeamLayout);
+//        BlueTeamLayoutView.setBackgroundColor(Color.BLUE);
+//        BlueTeamLayoutView.setBackgroundResource(R.drawable.rounded_blue);
 
         mBlueTeamView = (LinearLayout) findViewById(R.id.blueTeam);
         mRedTeamView = (LinearLayout) findViewById(R.id.redTeam);
         mNoTeamView = (LinearLayout) findViewById(R.id.noTeam);
+
         if (mCreator) {
             Button button = new Button(this);
             button.setText("Start Game");
@@ -137,10 +128,10 @@ public class WaitingRoomActivity extends Activity {
                     String leader = "";
                     if(bluePlayers == 0 && team.equals("blue")){
                         bluePlayers++;
-                        leader = " (LEADER)";
+                        leader = " " + getResources().getString(R.string.leader);
                     } else if(redPlayers == 0 && team.equals("red")){
                         redPlayers++;
-                        leader = " (LEADER)";
+                        leader = " " + getResources().getString(R.string.leader);
                     }
                     if(name.equals(mPlayerName)){
                         mTeam = team;

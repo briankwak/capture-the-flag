@@ -50,7 +50,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginTop="1dp"
         android:orientation="horizontal"
-        android:weightSum="1"
+        android:weightSum="2"
         app:layout_constraintBottom_toTopOf="@+id/button3"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -62,43 +62,68 @@
         tools:layout_constraintRight_creator="1"
         tools:layout_constraintTop_creator="1">
 
-        <LinearLayout
-            android:layout_width="188dp"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:layout_weight="1"
+           android:background="@drawable/rounded_blue"
+           android:orientation="vertical"
+           android:padding="2dp"
+           android:layout_marginRight="1dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:text="Blue Team"
-                android:textAlignment="center" />
+           <TextView
+               android:id="@+id/blueTeamButton"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:text="BLUE TEAM"
+               android:textColor="@color/white"
+               android:padding="8dp"
+               android:textStyle="bold"
+               android:gravity="center_horizontal"/>
 
-            <LinearLayout
-                android:id="@+id/blueTeam"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"></LinearLayout>
-        </LinearLayout>
+           <LinearLayout
+               android:id="@+id/blueTeam"
+               android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:background="@drawable/rounded_white"
+               android:orientation="vertical"
+               android:padding="8dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.99"
-            android:orientation="vertical">
+           </LinearLayout>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:text="Red Team"
-                android:textAlignment="center" />
+       </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/redTeam"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"></LinearLayout>
-        </LinearLayout>
+       <LinearLayout
+           android:id="@+id/redTeamLayout"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:layout_weight="1"
+           android:background="@drawable/rounded_red"
+           android:orientation="vertical"
+           android:padding="2dp"
+           android:layout_marginLeft="1dp">
+
+           <TextView
+               android:id="@+id/redTeamButton"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:text="RED TEAM"
+               android:textColor="@color/white"
+               android:padding="8dp"
+               android:textStyle="bold"
+               android:gravity="center_horizontal"/>
+
+           <LinearLayout
+               android:id="@+id/redTeam"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:layout_weight="1"
+               android:background="@drawable/rounded_white"
+               android:orientation="vertical"
+               android:padding="8dp">
+
+           </LinearLayout>
+
+       </LinearLayout>
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
