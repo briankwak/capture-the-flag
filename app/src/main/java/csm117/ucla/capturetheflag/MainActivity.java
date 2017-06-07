@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 if(!dataSnapshot.exists()){
                     mDatabase.child("areas").child(key).removeValue();
                     mDatabase.child("games").child(key).removeValue();
+                    mDatabase.child("messages").child(key).removeValue();
                 }
             }
 

@@ -296,7 +296,7 @@ public class GameActivity extends AppCompatActivity
                         mCircle.setCenter(playerLoc);
                         mInnerCircle.setCenter(playerLoc);
                         mDead = player.dead;
-                        if(player.hasFlag && withinTerritory()){
+                        if(player.hasFlag && withinTerritory(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude()))){
                             mDatabase.child("games").child(mGameName).setValue(player.team);
                         }
                     }
@@ -361,6 +361,47 @@ public class GameActivity extends AppCompatActivity
                     }
 
                 }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+            }
+
+
+        });
+
+
+        mDatabase.child("games").child(mGameName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    return;
+                }
+                String str = (String)dataSnapshot.getValue();
+                if(str.equals("red") || str.equals("blue")) {
+                    if (str.equals(mTeam)) {
+                        mWin = true;
+                    }
+                    winningTeam = str;
+                    endGame();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+            }
+
+        });
+
+        mDatabase.child("messages").child(mGameName).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()){
+                    return;
+                }
+                String msg = (String)dataSnapshot.getValue();
+                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -668,13 +709,14 @@ public class GameActivity extends AppCompatActivity
         String name = marker.getTitle();
         if(Area.withinCircle(marker.getPosition(),mInnerCircle) ) {
             if (mPlayerMarkers.containsKey(name)) {
-                if (!mMyTeam.contains(name) && !mDead && withinTerritory()) {
+                if (!mMyTeam.contains(name) && !mDead && withinTerritory(new LatLng(mCurrentLocation.getLatitude(),mCurrentLocation.getLongitude())) && withinTerritory(marker.getPosition())) {
                     killPlayer(name);
                 }
             } else { // flag is taken
                 if ((name.equals(mRedFlagMarker.getTitle()) && mTeam.equals("blue")) ||
                         (name.equals(mBlueFlagMarker.getTitle()) && mTeam.equals("red"))) {
                     takeFlag();
+                    mDatabase.child("messages").child(mGameName).setValue(mPlayerName + " has the " + name + "!");
                 }
 
             }
@@ -688,15 +730,16 @@ public class GameActivity extends AppCompatActivity
 
     private void takeFlag() {
         mDatabase.child("players").child(mGameName).child(mPlayerName).child("hasFlag").setValue(true);
+
     }
 
     private void killPlayer(String name) {
         mDatabase.child("players").child(mGameName).child(name).child("dead").setValue(true);
+
+        mDatabase.child("messages").child(mGameName).setValue(name + " has died!");
     }
 
-    private boolean withinTerritory() {
-        double lat = mCurrentLocation.getLatitude();
-        double lng = mCurrentLocation.getLongitude();
+    private boolean withinTerritory(LatLng latLng) {
         LatLng min;
         LatLng max;
         if (mTeam.equals("blue")) {
@@ -706,6 +749,6 @@ public class GameActivity extends AppCompatActivity
             min = mRedMin;
             max = mRedMax;
         }
-        return Area.withinArea(new LatLng(lat, lng), min, max);
+        return Area.withinArea(latLng, min, max);
     }
 }
